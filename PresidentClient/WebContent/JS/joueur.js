@@ -34,7 +34,7 @@ function Connect(login,mdp){
 			var d = login+mdp;
 			console.log(d);
 			if(CurrentPlayer.login == login && CurrentPlayer.mdp == mdp) {
-				createCookie(CookieLogin, CurrentPlayer.login);
+				setCookie("CookieLogin", CurrentPlayer.login);
 				self.location.href = "http://localhost:8080/PresidentClient/Menu.html";
 			}
 			else{
@@ -47,22 +47,26 @@ function Connect(login,mdp){
 	});
 }
 
-function createCookie(name,value){
-	var date = new Date();
-	date.setTime(date.getTime()+(days*24*60*60*1000));
-	var expires = "; expires="+date.toGMTString();
-	document.cookie = name+"="+value+expires+"; path=/";
+function setCookie(sName, sValue) {
+    var today = new Date(), expires = new Date();
+    expires.setTime(today.getTime() + (365*24*60*60*1000));
+    document.cookie = sName + "=" + encodeURIComponent(sValue) + ";expires=" + expires.toGMTString();
 }
 
-function readCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-	}
-	return null;
+function getCookie(sName) {
+    var cookContent = document.cookie, cookEnd, i, j;
+    var sName = sName + "=";
+    for (i=0, c=cookContent.length; i<c; i++) {
+            j = i + sName.length;
+            if (cookContent.substring(i, j) == sName) {
+                    cookEnd = cookContent.indexOf(";", j);
+                    if (cookEnd == -1) {
+                            cookEnd = cookContent.length;
+                    }
+                    return decodeURIComponent(cookContent.substring(j, cookEnd));
+            }
+    }
+    return null;
 }
 
 function eraseCookie(name) {
@@ -85,7 +89,7 @@ function InscrireJoueur(){
 	$.ajax({
 		type: 'PUT',
 		contentType : 'application/json',
-		url: rootURL + 'ajoutJoueur',
+		url: rootURL + 'ajoutJoueur/',
 		dataType: 'json',
 		data : joueurFormToJSON(),
 		success : function(data, textStatus, jqXHR){
@@ -99,12 +103,13 @@ function InscrireJoueur(){
 
 function joueurFormToJSON(){
 	console.log("adressage des infos");
+	console.log($('#nom').val());
 	return JSON.stringify({
 		"nom": $('#nom').val(),
 		"prenom": $('#prenom').val(),
 		"login": $('#login').val(),
 		"mail": $('#mail').val(),
-		"mdp" : $('#password').val()
+		"mdp" : $('#password').val(),
 	});
 }
 

@@ -12,8 +12,8 @@ import javax.ws.rs.core.MediaType;
 
 @Path("Partie")
 public class CollectionPartie {
-	private ArrayList<Partie> parties;
-	private int countPartie = 0;
+	private static ArrayList<Partie> parties;
+	private static int countPartie = 0;
 
 	public CollectionPartie(){
 		countPartie++;

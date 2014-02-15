@@ -33,7 +33,7 @@ $('#menu').click(function(){
 	return false;
 });
 
-$('#newPartie').click(function(){
+$('#newPlay').click(function(){
 	NewGame();
 	return false;
 });

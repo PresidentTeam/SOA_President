@@ -14,8 +14,8 @@ import javax.ws.rs.core.MediaType;
 
 @Path("Joueur")
 public class Population {
-	private ArrayList<Joueur> joueurs;
-	private int countJoueur = 0;
+	private static ArrayList<Joueur> joueurs;
+	private static int countJoueur = 0;
 	
 	public Population(){
 		countJoueur++;
@@ -67,13 +67,15 @@ public class Population {
 		return s;
 	}
 	
-	
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("ajoutJoueur")
 	public void AddJoueur(Joueur j){
 		Joueur joueur = new Joueur(j.getNom(), j.getPrenom(), j.getLogin(), j.getMail(), j.getMdp());
 		joueurs.add(joueur);
+		for (Joueur jo : joueurs){
+			System.out.println(jo.getNom());
+		}
 	}
 	
 	@DELETE
