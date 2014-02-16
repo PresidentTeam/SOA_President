@@ -2,8 +2,6 @@ package ressources;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-// import ressources.BDD;
-
 @XmlRootElement
 public class Joueur {
 	
@@ -31,9 +29,12 @@ public class Joueur {
 		this.mail = m;
 		this.mdp = pass;
 		this.score = 0;
-		
-		// BDD database = new BDD();
-		// database.insertJoueur(m, p, n, l, pass);
+		/*
+		BDD database = new BDD();
+		database.createConnection();
+		database.insertJoueur(m, p, n, l, pass);
+		database.closeConnection();
+		*/
 	}
 
 	public int getIdJoueur() {return this.idJoueur;}

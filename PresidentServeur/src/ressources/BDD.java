@@ -5,10 +5,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class BDD 
-{
-	private static BDD instance = new BDD();
-	
+{	
 	public static Connection conn = null;
 	public static Statement stmt = null;
 	public static ResultSet res = null;
@@ -19,13 +20,14 @@ public class BDD
 	public static String driver = "com.mysql.jdbc.Driver";
 	public static String dbName = "/soa_president";
 	public static String url = "jdbc:mysql://localhost:";
-	public static String port = "8889";
+	public static String port = "3306";
 
 	public BDD(){
 		
-		System.out.println("test connexion");
+		System.out.println("Récupération Driver");
 		try{
 			Class.forName(driver);
+			System.out.println("Driver récupéré");
 			}
 		catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -42,9 +44,13 @@ public class BDD
 		return conn;
 	}
 	
-	public static Connection getConnection() {
-        return instance.createConnection();
-    }
+	public void closeConnection(){
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public int insertJoueur(String nom, String prenom, String login, String mail, String mdp){
 		ResultSet resultats = null;

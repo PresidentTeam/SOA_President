@@ -9,7 +9,12 @@ var rootURL = "http://localhost:8080/President/rest/";
 var CurrentPlayer;
 
 $('#play').click(function(){
-	Play();
+	if(!CurrentPlayer){
+		Connexion();
+	}
+	else{
+		self.location.href = "http://localhost:8080/PresidentClient/SelectionPartie.html";
+	}
 	return false;
 });
 
@@ -39,17 +44,12 @@ $('#newPlay').click(function(){
 });
 
 $('#PartieLigne').click(function(){
-	if(!CurrentPlayer){
-		Connexion();
-	}
-	else{
-		self.location.href = "http://localhost:8080/PresidentClient/Menu.html";
-	}
+	Menu();
 	return false;
 });
 
 $('#PartieLocale').click(function(){
-	Connexion();
+	Play();
 	return false;
 });
 

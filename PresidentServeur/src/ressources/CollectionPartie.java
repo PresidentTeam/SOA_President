@@ -2,8 +2,10 @@ package ressources;
 
 import java.util.ArrayList;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -48,7 +50,7 @@ public class CollectionPartie {
 	//	return "{\"idPartie\" : 0, \"NbJoueurs\" : 0, \"doitJouer\" : 0, \"etat\" : \""+e+"\", \"vainqueur\" : 0, \"dateDebut\" : \"Inconnu\"}";
 	}
 
-	@GET	 // this method process GET request from client
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getParties(){
 		int i = 1;
@@ -64,6 +66,17 @@ public class CollectionPartie {
 	}
 
 
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("ajoutPartie")
+	public void AddJoueur(Partie p){
+		Partie partie = new Partie();
+		parties.add(partie);
+		for (Partie pa : parties){
+			System.out.println(pa.getNbJoueurs());
+		}
+	}
+	
 	@DELETE
 	@Path("supprimePartie/{uniqueId}")
 	public void DeletePartie( @PathParam("uniqueId") int id ){

@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 public class Population {
 	private static ArrayList<Joueur> joueurs;
 	private static int countJoueur = 0;
-	
+
 	public Population(){
 		countJoueur++;
 		if(countJoueur == 1){
@@ -26,7 +26,7 @@ public class Population {
 			joueurs.add(new Joueur("Charlotte", "Saintpierre", "Charlotte", "charlotte@president.com","test"));
 		}
 	}
-	
+
 	@GET
 	@Path("{uniqueId}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -38,21 +38,23 @@ public class Population {
 		else 
 			return "{\"nom\" : \"Inconnu\", \"prenom\" : \"Inconnu\", \"login\" : \"Inconnu\", \"mail\" : \"Inconnu\", \"mdp\" : \"Inconnu\", \"score\" : 0}";
 	}
-	
+
 	@GET
 	@Path("query")
-	@Produces(MediaType.APPLICATION_JSON) // sends JSON
+	@Produces(MediaType.APPLICATION_JSON) 
 	public String getJoueur(@QueryParam("login") String l, @QueryParam("mdp") String m){
 		Joueur joueurCo = null;
+		System.out.println(l);
+		
 		for(Joueur j : joueurs)
 			if(j.getLogin().equals(l) && j.getMdp().equals(m)){
 				joueurCo = j;
 				return joueurCo.toJSON();
-			}
+			} 
 		return "{\"nom\" : \"Inconnu\", \"prenom\" : \"Inconnu\", \"login\" : \"Inconnu\", \"mail\" : \"Inconnu\", \"mdp\" : \"Inconnu\", \"score\" : 0}";
 	}
-	
-	@GET	 // this method process GET request from client
+
+	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getJoueurs(){
 		int i = 1;
@@ -66,7 +68,7 @@ public class Population {
 		s+="]";
 		return s;
 	}
-	
+
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("ajoutJoueur")
@@ -77,7 +79,7 @@ public class Population {
 			System.out.println(jo.getNom());
 		}
 	}
-	
+
 	@DELETE
 	@Path("supprimeJoueur/{uniqueId}")
 	public void DeleteJoueur( @PathParam("uniqueId") int id ){

@@ -15,7 +15,6 @@ $('#connection').click(function(){
 });
 
 $('#creerLogin').click(function(){
-	console.log("test");
 	var test = VerificationPassword( $('#password').val(), $('#VerifPassword').val() );
 	if( test != null)
 		InscrireJoueur();
@@ -32,7 +31,6 @@ function Connect(login,mdp){
 			console.log('Connexion faite par ' + login + mdp);
 			CurrentPlayer = data;
 			var d = login+mdp;
-			console.log(d);
 			if(CurrentPlayer.login == login && CurrentPlayer.mdp == mdp) {
 				setCookie("CookieLogin", CurrentPlayer.login);
 				self.location.href = "http://localhost:8080/PresidentClient/Menu.html";
@@ -102,8 +100,6 @@ function InscrireJoueur(){
 }
 
 function joueurFormToJSON(){
-	console.log("adressage des infos");
-	console.log($('#nom').val());
 	return JSON.stringify({
 		"nom": $('#nom').val(),
 		"prenom": $('#prenom').val(),
