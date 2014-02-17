@@ -4,13 +4,13 @@
  */
 
 //The root URL for the RESTful services
-var rootURL = "http://localhost:8080/PresidentServeur/rest/Joueur/";
+var rootURL = "http://localhost:8080/PresidentServeur/rest";
 
 //retrouve la liste de tous les joueurs au demarrage 
 
 
 $('#connection').click(function(){
-	Connect( $('#login').val(), $('#mdp').val() );
+	Connect();
 	return false;
 });
 
@@ -20,29 +20,58 @@ $('#creerLogin').click(function(){
 		InscrireJoueur();
 	return false;
 });
-
-function Connect(login,mdp){
-	console.log('Recherche login-mdp ' + login + ' ' + mdp);
+/*
+function Connect(){
 	$.ajax({
 		type: 'GET',
-		url : rootURL + 'query?login=' + login + '&mdp=' + mdp,
+		url: rootURL + '/Player/test',
+		dataType: 'json',
+		data: connFormToJson()
+	});
+}
+	
+function connFormToJson(){
+	return JSON.stringify({
+		'login': 'Ame', 
+		'mdp': 'lie'
+		});
+}*/
+
+function Connect(){	
+	$.ajax({
+		type: 'GET',
+		url : rootURL + '/Player/Connexion',
 		dataType : 'json',
+		data: {
+			"login": $('#login').val(), 
+			"mdp": $('#mdp').val() 
+		},
 		success : function(data){
-			console.log('Connexion faite par ' + login + mdp);
 			CurrentPlayer = data;
-			var d = login+mdp;
+			
+			login = $('#login').val();
+			mdp = $('#mdp').val();
+			
 			if(CurrentPlayer.login == login && CurrentPlayer.mdp == mdp) {
 				setCookie("CookieLogin", CurrentPlayer.login);
 				self.location.href = "http://localhost:8080/PresidentClient/Menu.html";
 			}
 			else{
-				alert("Mauvaise combinaison login");
+				alert("Mauvaise combinaison login/password");
 			}
 		},
 		error: function(jqXHR, textStatus, errorThrown){
 			alert("Chemin non accessible :" + errorThrown);
 		}
 	});
+}
+
+function coFormToJSON() {	
+	//alert("log "+$('#login').val()+" mdp "+$('#mdp').val() );
+	return JSON.stringify({
+		"login": $('#login').val(), 
+		"mdp": $('#mdp').val() 
+		});
 }
 
 function setCookie(sName, sValue) {

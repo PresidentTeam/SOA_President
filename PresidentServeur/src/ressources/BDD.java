@@ -1,9 +1,5 @@
 package ressources;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -12,36 +8,22 @@ public class BDD
 {	
 	public static Connection conn = null;
 	public static Statement stmt = null;
-	public static ResultSet res = null;
+	//public static ResultSet res = null;
 
 	public static String userName = "root";
-	public static String password = "root";
+	public static String password = "";
 	
 	public static String driver = "com.mysql.jdbc.Driver";
 	public static String dbName = "/soa_president";
-	public static String url = "jdbc:mysql://localhost:";
-	public static String port = "3306";
+	public static String url = "jdbc:mysql://localhost";
+	//public static String port = "3306";
 
-	public BDD(){
+	public BDD() throws SQLException, ClassNotFoundException {
 		
-		System.out.println("Récupération Driver");
-		try{
-			Class.forName(driver);
-			System.out.println("Driver récupéré");
-			}
-		catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public Connection createConnection(){
-		try {
-			conn = DriverManager.getConnection(url+port+dbName,userName,password);
-			System.out.println("Connected to the database");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return conn;
+		Class.forName("com.mysql.jdbc.Driver");
+		System.out.println("Driver récupéré");
+		conn = DriverManager.getConnection(url+dbName,userName,password);
+		stmt = conn.createStatement();
 	}
 	
 	public void closeConnection(){

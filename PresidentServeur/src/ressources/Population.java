@@ -18,13 +18,13 @@ public class Population {
 	private static int countJoueur = 0;
 
 	public Population(){
-		countJoueur++;
+/*		countJoueur++;
 		if(countJoueur == 1){
 			joueurs = new ArrayList<Joueur>();
 			joueurs.add(new Joueur("Romain", "Morice", "Romain", "romain@president.com", "test"));
 			joueurs.add(new Joueur("Amelie", "Lefevre", "Amelie", "amelie@president.com","test"));
 			joueurs.add(new Joueur("Charlotte", "Saintpierre", "Charlotte", "charlotte@president.com","test"));
-		}
+		}*/
 	}
 
 	@GET
@@ -69,7 +69,7 @@ public class Population {
 		return s;
 	}
 
-	@PUT
+	/*@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("ajoutJoueur")
 	public void AddJoueur(Joueur j){
@@ -78,7 +78,7 @@ public class Population {
 		for (Joueur jo : joueurs){
 			System.out.println(jo.getNom());
 		}
-	}
+	}*/
 
 	@DELETE
 	@Path("supprimeJoueur/{uniqueId}")
