@@ -2,18 +2,31 @@
  * 
  * Fichier javascript contenant toutes les interactions entre les interfaces.
  */
+function afficher_deconnexion(){
+	var div = document.getElementById('deconnexion');
+	var span = document.getElementById('nom');
+	var joueur_co = getCookie("CookieLogin");
+	
+	if(joueur_co){
+		if( div.style.display == 'none'){
+			span.innerHTML = joueur_co;
+			div.style.display ='block';
+		}
+	}
+}
 
-//The root URL for the RESTful services
-var rootURL = "http://localhost:8080/President/rest/";
-
-var CurrentPlayer;
+$('#deco').click(function(){
+	eraseCookie("CookieLogin");
+	eraseCookie("CookieLogin2");
+	self.location.href = "./Client.html";
+})
 
 $('#play').click(function(){
-	if(!CurrentPlayer){
+	if(!getCookie("CookieLogin")){
 		Connexion();
 	}
 	else{
-		self.location.href = "http://localhost:8080/PresidentClient/SelectionPartie.html";
+		self.location.href = "./SelectionPartie.html";
 	}
 	return false;
 });
@@ -49,34 +62,34 @@ $('#PartieLigne').click(function(){
 });
 
 $('#PartieLocale').click(function(){
-	Play();
+	PlayLocal();
 	return false;
 });
 
-function Play(){
-	self.location.href = "http://localhost:8080/PresidentClient/SelectionPartie.html";
+function PlayLocal(){
+	self.location.href = "./ConnexionLocale.html";
 }
 
 function Rules(){
-	self.location.href = "http://localhost:8080/PresidentClient/Regles.html";
+	self.location.href = "./Regles.html";
 }
 
 function HomePage(){
-	self.location.href = "http://localhost:8080/PresidentClient/";
+	self.location.href = "./Client.html";
 }
 
 function Connexion(){
-	self.location.href = "http://localhost:8080/PresidentClient/Connexion.html";
+	self.location.href = "./Connexion.html";
 }
 
 function Inscription(){
-	self.location.href = "http://localhost:8080/PresidentClient/Inscription.html";
+	self.location.href = "./Inscription.html";
 }
 
 function Menu(){
-	self.location.href = "http://localhost:8080/PresidentClient/Menu.html";
+	self.location.href = "./Menu.html";
 }
 
 function NewGame(){
-	self.location.href = "http://localhost:8080/PresidentClient/CreationPartie.html";
+	self.location.href = "./CreationPartie.html";
 }

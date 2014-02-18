@@ -5,7 +5,11 @@
 <title>Jeu du président</title>
 
 </head>
-<body>
+<body onload='javascipt:afficher_deconnexion();'>
+	<div id="deconnexion" style="display:none">
+		Bienvenue <span id="nom"></span> !
+		<button id="deco">Déconnexion</button>
+	</div>
 	<div>
 		<h3>Jeu du président</h3>
 	</div>
@@ -17,5 +21,6 @@
 	</div>
 	<script src="./JS/jquery-1.10.2.js"></script>
 	<script src="./JS/main.js"></script>
+	<script src="./JS/joueur.js"></script>
 </body>
 </html>

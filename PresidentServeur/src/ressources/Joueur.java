@@ -43,19 +43,20 @@ public class Joueur {
 	}
 	
 	@GET
-	@Path("test")
-	public void test(@QueryParam("login") String login, @QueryParam("mdp") String mdp){
-		System.out.println("connexion login "+login+" mdp "+mdp);
-	}
-	
-	@GET
 	@Path("Connexion")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String connexion(@DefaultValue("Inconnue") @QueryParam("login") String login, @DefaultValue("Inconnue") @QueryParam("mdp") String mdp) throws SQLException, ClassNotFoundException{
-		System.out.println("connexion login "+login+" mdp "+mdp);
+		//System.out.println("connexion login "+login+" mdp "+mdp);
 		
-		BDD bdd = new BDD();
+		//si il n'y a pas eu de connexion a la bdd, on l'initie
+		if(stmt == null){
+			 new BDD();
+		}
 		
+		return verif_connex(login, mdp);
+	}
+	
+	public String verif_connex(String login, String mdp) throws SQLException{
 		ResultSet resultat = stmt.executeQuery("SELECT *  FROM joueur WHERE login='"+login+"' and mdp='"+mdp+"';"); 
         resultat.last();
         //on récupère le numéro de la ligne

@@ -6,9 +6,9 @@
 <link rel="stylesheet" media="screen" type="text/css" title="Exemple"
 	href="Globaldesign.css" />
 </head>
-<body onload='javascipt:afficher_deconnexion();'>
+<body onload='javascipt:afficher_deconnexion(); afficher_nom_joueur_2();'>
 	<div id="deconnexion" style="display:none">
-		Bienvenue <span id="nom"></span> !
+		Bienvenue <span id="nom"></span> <span id="nom_joueur_2"></span>
 		<button id="deco">Déconnexion</button>
 	</div>
 	<div>
@@ -16,23 +16,14 @@
 	</div>
 
 	<div class="creationPartie">
-		<ul>
-			<li>Nombre de joueurs</li>
-			<li><select id="nbJoueur">
-					<option value="2">2 joueurs</option>
-					<option value="3">3 joueurs</option>
-					<option value="4">4 joueurs</option>
-					<option value="5">5 joueurs</option>
-			</select>
-		</ul>
 	</div>
 	<div class="action">
-		<button id="creerPartie">Créer</button><button id="PartieLigne">Retour</button>
+		<button id="retour" onClick = "javascript:self.location.href = './ConnexionLocale.html';">Retour</button>
 	</div>
 	
 	<script src="./JS/jquery-1.10.2.js"></script>
 	<script src="./JS/main.js"></script>
-	<script src="./JS/partie.js"></script>
+	<script src="./JS/partie_locale.js"></script>
 	<script src="JS/joueur.js"></script>
 </body>
 </html>

@@ -6,9 +6,6 @@
 //The root URL for the RESTful services
 var rootURL = "http://localhost:8080/PresidentServeur/rest";
 
-//retrouve la liste de tous les joueurs au demarrage 
-
-
 $('#connection').click(function(){
 	Connect();
 	return false;
@@ -20,22 +17,7 @@ $('#creerLogin').click(function(){
 		InscrireJoueur();
 	return false;
 });
-/*
-function Connect(){
-	$.ajax({
-		type: 'GET',
-		url: rootURL + '/Player/test',
-		dataType: 'json',
-		data: connFormToJson()
-	});
-}
-	
-function connFormToJson(){
-	return JSON.stringify({
-		'login': 'Ame', 
-		'mdp': 'lie'
-		});
-}*/
+
 
 function Connect(){	
 	$.ajax({
@@ -54,14 +36,14 @@ function Connect(){
 			
 			if(CurrentPlayer.login == login && CurrentPlayer.mdp == mdp) {
 				setCookie("CookieLogin", CurrentPlayer.login);
-				self.location.href = "http://localhost:8080/PresidentClient/Menu.html";
+				self.location.href = "./SelectionPartie.html";
 			}
 			else{
 				alert("Mauvaise combinaison login/password");
 			}
 		},
 		error: function(jqXHR, textStatus, errorThrown){
-			alert("Chemin non accessible :" + errorThrown);
+			alert("Chemin non accessible :" + errorThrown+" "+jqXHR.status);
 		}
 	});
 }
@@ -97,7 +79,7 @@ function getCookie(sName) {
 }
 
 function eraseCookie(name) {
-	createCookie(name,"",-1);
+	setCookie(name,"");
 }
 
 function VerificationPassword(mdp, verifMdp){
