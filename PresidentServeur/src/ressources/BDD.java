@@ -21,7 +21,6 @@ public class BDD
 	public BDD() throws SQLException, ClassNotFoundException {
 		
 		Class.forName("com.mysql.jdbc.Driver");
-		System.out.println("Driver récupéré");
 		conn = DriverManager.getConnection(url+dbName,userName,password);
 		stmt = conn.createStatement();
 	}

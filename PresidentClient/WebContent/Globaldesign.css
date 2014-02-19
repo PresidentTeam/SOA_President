@@ -21,3 +21,16 @@
 .cartes li.carte9 {background-position: -440px top;}
 .cartes li.carte10 {background-position: -495px top;}
 .cartes li.carte11 {background-position: -550px top;}
+
+
+.nomJoueurs, #plateau2{
+	margin-left: auto;
+  	margin-right: auto;
+  	width: 700px; 
+}
+.cartesHori{
+	height: 150px;
+}
+#plateau2{
+	height: 250px;
+}

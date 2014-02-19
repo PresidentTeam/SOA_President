@@ -12,6 +12,9 @@ function afficher_deconnexion(){
 			span.innerHTML = joueur_co;
 			div.style.display ='block';
 		}
+	}else{
+		self.location.href = "./Client.html";
+		return false;
 	}
 }
 
@@ -19,7 +22,7 @@ $('#deco').click(function(){
 	eraseCookie("CookieLogin");
 	eraseCookie("CookieLogin2");
 	self.location.href = "./Client.html";
-})
+});
 
 $('#play').click(function(){
 	if(!getCookie("CookieLogin")){

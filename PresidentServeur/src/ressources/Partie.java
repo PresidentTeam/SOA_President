@@ -4,40 +4,39 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Partie {
-
+	
 	private int idPartie;
-	private int NbJoueurs;
-	private int doitJouer;
-	private String etat;
-	private int vainqueur;
-	private String dateDebut;
+	private int nb_tour;
+	private int score1;
+	private int score2;
+	private String login1;
+	private String login2;
 
 	public Partie(){
 		this.idPartie = 0;
-		this.NbJoueurs = 2;
-		this.doitJouer = 1;
-		this.etat = "fini";
-		this.vainqueur = 1;
-		this.dateDebut = "2014-02-11";
+		this.nb_tour = 0;
+		this.score1 = 0;
+		this.score2 = 0;
+		this.login1 = null;
+		this.login2 = null;
 	}
 
-	public Partie(int nbJoueurs, int doitJouer, String date){
-		this.idPartie++;
-		this.NbJoueurs = nbJoueurs;
-		this.doitJouer = doitJouer;
-		this.etat = "EnAttente";
-		this.dateDebut = date;
-		this.vainqueur = 0;
+	public Partie(String login1, String login2, int score1, int score2, int nb_tour){
+		this.nb_tour = nb_tour;
+		this.score1 = score1;
+		this.score2 = score2;
+		this.login1 = login1;
+		this.login2 = login2;
 	}
 
 	public int getIdPartie(){return this.idPartie;}
-	public int getNbJoueurs(){return this.NbJoueurs;}
-	public int getDoitJouer(){return this.doitJouer;}
-	public String getEtat(){return this.etat;}
-	public int getVainqueur(){return this.vainqueur;}
-	public String getDate(){return this.dateDebut;}
+	public int getNbTour(){return this.nb_tour;}
+	public int getScore1(){return this.score1;}
+	public int getScore2(){return this.score2;}
+	public String getlogin1(){return this.login1;}
+	public String getlogin2(){return this.login2;}
 
-	public String toJSON(){
+	/*public String toJSON(){
 		return "{ \"idPartie\" : \""+idPartie+"\", \"NbJoueurs\" : \""+NbJoueurs+"\",\"doitJouer\" : \""+doitJouer+"\", \"vainqueur\" : \""+vainqueur+"\", \"dateDebut\" : \""+dateDebut+"\"}";
-	}
+	}*/
 }
