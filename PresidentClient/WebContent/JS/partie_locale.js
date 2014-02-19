@@ -1,6 +1,6 @@
 /**
  * 
- * Ficher Javascript pour toutes les actions sur les joueurs
+ * Ficher Javascript pour la partie locale
  */
 
 //The root URL for the RESTful services
@@ -16,6 +16,10 @@ var nb_tour = 0;
 var score_J1 = 0;
 var score_J2 =0;
 var id_partie = null;
+var tapis = new Array();
+var passe = false;
+var passe_manche_J1 = false;
+var passe_manche_J2 = false;
 
 function afficher_connex(){
 	var joueur_co_2 = getCookie("CookieLogin2");
@@ -51,7 +55,7 @@ function afficher_noms(){
 	var joueur_co_1 = getCookie("CookieLogin");
 	
 	if(joueur_co_2){	
-		span.innerHTML = ' et '+joueur_co_2;
+		span.innerHTML = ' et '+joueur_co_2+" <button id='enregistrer'>Enregistrer la partie</button>";
 		span.style.display ='block';
 	}else{
 		joueur_co_2 = "Joueur 2";
@@ -76,6 +80,15 @@ function change_joueur(joueur){
 function tri(a, b){
 	a = a.substring(0, a.indexOf("C"));
 	b = b.substring(0, b.indexOf("C"));
+	
+	if(a == "2")	
+		return 1;
+	if(b == "2")	
+		return -1;
+	if(a == "1")
+		return 1;
+	if(b == "1")	
+		return -1;
 	
 	return parseInt(a) - parseInt(b);
 }
@@ -171,44 +184,122 @@ function new_tour(){
 	});
 }
 
+function carte_tapis(val_carte){
+	tapis[tapis.length] = val_carte;
+	document.getElementById('plateau2').innerHTML += " <span class='carte_tapis'>"+val_carte+"</span>";
+}
+
+function passer(j){
+	if(j == "J1"){
+		if(passe){
+			passe = false;
+		}else{
+			passe_manche_J1 = true;
+		}
+		change_joueur("J2");
+	}else{
+		if(passe){
+			passe = false;
+		}else{
+			passe_manche_J2 = true;
+		}
+		change_joueur("J1");
+	}
+}
+
 function jouer_carte(joueur, num_carte){
 	//alert("jeu : "+num_carte+" de "+joueur);
-
+	val_1 = val_2 = val_3 = 0;
+	
+	//on recupere la valeur d'au max les 3 dernieres cartes du tapis
+	if(tapis.length>0){
+		val_1 = tapis[tapis.length-1].substring(0, tapis[tapis.length-1].indexOf("C"));
+		if(tapis.length>1){
+			val_2 = tapis[tapis.length-2].substring(0, tapis[tapis.length-2].indexOf("C"));
+			if(tapis.length>2){
+				val_3 = tapis[tapis.length-3].substring(0, tapis[tapis.length-3].indexOf("C"));
+			}	
+		}
+	}
+	
 	if(joueur == "J1"){
-		nb_cartes_J1 -=1;
-		change_nb_cartes("nb_J1", nb_cartes_J1);
-		document.getElementById('carte1_'+num_carte).style.display = 'none';
+		val = cartes1[num_carte].substring(0, cartes1[num_carte].indexOf("C"));
 		
-		if(nb_cartes_J1 ==0){ //si le J1 a gagné
-			score_J2 -= 2;
-			score_J1 += 2;
+		//si la carte voulu est + petite que la derniere sur le tapis
+		if((tapis.length == 0 || tri(cartes1[num_carte], tapis[tapis.length-1]) != -1) && (!passe || val_1 == val)){
+			nb_cartes_J1 -=1;
+			change_nb_cartes("nb_J1", nb_cartes_J1);
+			document.getElementById('carte1_'+num_carte).style.display = 'none';
+			carte_tapis(cartes1[num_carte]);
 			
-			if(joueur_2 != "Joueur 2")
-				save_partie();
-			
-			document.getElementById('joueur2').style.display = 'none';
-			document.getElementById('joueur1').style.display = 'none';
-			document.getElementById('plateau2').innerHTML = "<h5>Bravo "+joueur_1+" ! Vous avez gagne ce tour.</h5><br/> <button onClick='javascript:new_tour();'>Nouveau tour</button>";
-		}else{	
-			change_joueur("J2");
+			if(nb_cartes_J1 ==0){ //si le J1 a gagné
+				score_J2 -= 2;
+				score_J1 += 2;
+				
+				if(joueur_2 != "Joueur 2")
+					save_partie();
+				
+				document.getElementById('joueur2').style.display = 'none';
+				document.getElementById('joueur1').style.display = 'none';
+				document.getElementById('plateau2').innerHTML = "<h5>Bravo "+joueur_1+" ! Vous avez gagne ce tour.</h5><br/> <button onClick='javascript:new_tour();'>Nouveau tour</button>";
+			}else{	
+				
+				// si on joue un 2 ou que les 4 cartes de meme valeur sont posees, le jeu se ferme (on vide le tapis)
+				if(val == "2" || (val_1 == val_2 && val_2 == val_3 && val_3 == val)){
+					tapis = "";
+					document.getElementById('plateau2').innerHTML = "";
+
+					passe_manche_J2 = false;
+					passe_manche_J1 = false;
+					
+					change_joueur("J1");
+				}else{
+					if(val == val_1)
+						passe = true;
+					
+					if(!passe_manche_J2)
+						change_joueur("J2");
+				}
+			}
+		}else{
+			alert("Vous ne pouvez jouer cette carte");
 		}
 	}else{
-		nb_cartes_J2 -=1;
-		change_nb_cartes("nb_J2", nb_cartes_J2);
-		document.getElementById('carte2_'+num_carte).style.display = 'none';
+		val = cartes2[num_carte].substring(0, cartes2[num_carte].indexOf("C"));
 		
-		if(nb_cartes_J2 ==0){ //si le J2 a gagné
-			score_J1 -= 2;
-			score_J2 += 2;
+		if((tapis.length == 0 || tri(cartes2[num_carte], tapis[tapis.length-1]) != -1) && (!passe || val_1 == val)){
+			nb_cartes_J2 -=1;
+			change_nb_cartes("nb_J2", nb_cartes_J2);
+			document.getElementById('carte2_'+num_carte).style.display = 'none';
+			carte_tapis(cartes2[num_carte]);
 			
-			if(joueur_2 != "Joueur 2")
-				save_partie();
-			
-			document.getElementById('joueur2').style.display = 'none';
-			document.getElementById('joueur1').style.display = 'none';
-			document.getElementById('plateau2').innerHTML = "<h5>Bravo "+joueur_2+" ! Vous avez gagne ce tour.</h5><br/> <button onClick='javascript:new_tour();'>Nouveau tour</button>";
-		}else{	
-			change_joueur("J1");
+			if(nb_cartes_J2 ==0){ //si le J2 a gagné
+				score_J1 -= 2;
+				score_J2 += 2;
+				
+				if(joueur_2 != "Joueur 2")
+					save_partie();
+				
+				document.getElementById('joueur2').style.display = 'none';
+				document.getElementById('joueur1').style.display = 'none';
+				document.getElementById('plateau2').innerHTML = "<h5>Bravo "+joueur_2+" ! Vous avez gagne ce tour.</h5><br/> <button onClick='javascript:new_tour();'>Nouveau tour</button>";
+			}else{	
+				
+				if(val == "2" || (val_1 == val_2 && val_2 == val_3 && val_3 == val)){
+					tapis = "";
+					document.getElementById('plateau2').innerHTML = "";
+					
+					passe_manche_J2 = false;
+					passe_manche_J1 = false;
+					
+					change_joueur("J2");
+				}else{
+					if(!passe_manche_J1)
+						change_joueur("J1");
+				}
+			}
+		}else{
+			alert("Vous ne pouvez jouer cette carte");
 		}
 	}
 }
@@ -255,7 +346,7 @@ function demarrer_partie(){
 			cartes1.sort(tri);
 			cartes2.sort(tri);
 			
-			nb_cartes_J1 = 1;//cartes1.length;
+			nb_cartes_J1 = cartes1.length;
 			nb_cartes_J2 = cartes2.length;
 			
 			change_nb_cartes("nb_J1", nb_cartes_J1);

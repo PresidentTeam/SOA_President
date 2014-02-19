@@ -29,8 +29,10 @@
   	width: 700px; 
 }
 .cartesHori{
-	height: 150px;
+	height: 100px;
 }
 #plateau2{
-	height: 250px;
+	height: 200px;
+	text-align: center;
+	padding-top: 50px;
 }
