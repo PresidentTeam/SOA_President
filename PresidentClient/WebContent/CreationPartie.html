@@ -15,20 +15,14 @@
 		<h3>Jeu du président</h3>
 	</div>
 
-	<div class="creationPartie">
-		<ul>
-			<li>Nombre de joueurs</li>
-			<li><select id="nbJoueur">
-					<option value="2">2 joueurs</option>
-					<option value="3">3 joueurs</option>
-					<option value="4">4 joueurs</option>
-					<option value="5">5 joueurs</option>
-			</select>
-		</ul>
+	<div id="attenteJoueur" style="display: none;">
+		<h4>En attente d'un joueur ...</h4>
 	</div>
-	<div class="action">
-		<button id="creerPartie">Créer</button><button id="PartieLigne">Retour</button>
+	<div id="action">
+		<button id="jouer_ligne" onClick="javascript:jouer_ligne();">Jouer</button><button id="jouer_ami">Jouer avec un ami</button>
+		<button id="deco" onClick="javascript:self.location.href = './Menu.html';">Retour</button>
 	</div>
+	
 	
 	<script src="./JS/jquery-1.10.2.js"></script>
 	<script src="./JS/main.js"></script>

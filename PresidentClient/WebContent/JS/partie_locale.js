@@ -20,6 +20,29 @@ var tapis = new Array();
 var passe = false;
 var passe_manche_J1 = false;
 var passe_manche_J2 = false;
+var perdant = "";
+
+function vide_variable(){
+	tapis = "";
+	passe = false;
+	passe_manche_J1 = false;
+	passe_manche_J2 = false;
+	perdant = "";
+	cartes1 = new Array();
+	cartes2 = new Array();
+	joueur_1 = null;
+	joueur_2 = null;
+	nb_cartes_J1 = null;
+	nb_cartes_J2 = null;
+	nb_tour = 0;
+	score_J1 = 0;
+	score_J2 =0;
+}
+
+$('#retour_co_locale').click(function(){
+	vide_variable();
+	self.location.href = './ConnexionLocale.html';
+});
 
 function afficher_connex(){
 	var joueur_co_2 = getCookie("CookieLogin2");
@@ -107,11 +130,8 @@ function save_partie (){
 		url : rootURL + '/Jouer/SauverLocal',
 		dataType : 'json',
 		data: toJSON(),
-		success : function(data){
-			id_partie = data.id_partie;
-		},
 		error: function(jqXHR, textStatus, errorThrown){
-			alert("Chemin non accessible :" + errorThrown);
+			alert("Chemin non accessible :" + errorThrown + " " + jqXHR.status);
 		}
 	});*/
 }
@@ -127,18 +147,31 @@ function toJSON() {
 }
 
 function new_tour(){
-	alert("nouveau tour !");
+	
 	nb_tour ++;
+	document.getElementById('joueur2').style.display = 'block';
+	document.getElementById('joueur1').style.display = 'block';
+	document.getElementById('plateau2').innerHTML = '';
+	document.getElementById('cartesHoriJ1').innerHTML = '';
+	document.getElementById('cartesHoriJ2').innerHTML = '';
+	tapis = "";
+	passe = false;
+	passe_manche_J1 = false;
+	passe_manche_J2 = false;
+	cartes1 = new Array();
+	cartes2 = new Array();
+	nb_cartes_J1 = 0;
+	nb_cartes_J2 = 0;
 	
 	$.ajax({
 		type: 'GET',
 		url : rootURL + '/Jouer/NouveauTourLocal',
 		dataType : 'json',
 		success : function(data){
+			alert("success");
 			var i =0;	
 			var j=0;
-			infos = data;
-			var debut = infos.debut;
+			var infos = data;
 			
 			for(key1 in infos.cartesJ1){
 				cartes1[i] = infos.cartesJ1[key1];
@@ -152,19 +185,46 @@ function new_tour(){
 			
 			i=0;
 			j=0;
+
+			//tri les cartes par ordre croissant
+			cartes1.sort(tri);
+			cartes2.sort(tri);
+
+			var tab_temp = new Array();
+			
+			for(key1 in cartes1){
+				tab_temp[i] = cartes1[key1];
+				i++;
+			}
+			
+			i=0;
+			
+			//le perdant donne ses 2 meilleures cartes au gagnant, et inversement
+			if(perdant == "J2"){
+				cartes1[0] = cartes2[cartes2.length-1]; 
+				cartes1[1] = cartes2[cartes2.length-2]; 
+				cartes2[cartes2.length-1] = tab_temp[0]; 
+				cartes2[cartes2.length-2] = tab_temp[1]; 
+			}else{
+				cartes1[cartes1.length-1] = cartes2[0]; 
+				cartes1[cartes1.length-2] = cartes2[1]; 
+				cartes2[0] = tab_temp[tab_temp.length-1]; 
+				cartes2[1] = tab_temp[tab_temp.length-2]; 
+			}
+			
+			nb_cartes_J1 = cartes1.length;
+			nb_cartes_J2 = cartes2.length;
 			
 			//tri les cartes par ordre croissant
 			cartes1.sort(tri);
 			cartes2.sort(tri);
 			
-			nb_cartes_J1 = cartes1.length;
-			nb_cartes_J2 = cartes2.length;
-			
 			change_nb_cartes("nb_J1", nb_cartes_J1);
 			change_nb_cartes("nb_J2", nb_cartes_J2);
+					
+			change_joueur(perdant);
 			
-			change_joueur(debut);
-			
+			perdant = "";
 			
 			//les cartes de J1
 			for(carte in cartes1){
@@ -236,6 +296,8 @@ function jouer_carte(joueur, num_carte){
 				score_J2 -= 2;
 				score_J1 += 2;
 				
+				perdant = "J2";
+				
 				if(joueur_2 != "Joueur 2")
 					save_partie();
 				
@@ -276,6 +338,8 @@ function jouer_carte(joueur, num_carte){
 			if(nb_cartes_J2 ==0){ //si le J2 a gagné
 				score_J1 -= 2;
 				score_J2 += 2;
+				
+				perdant = "J1";
 				
 				if(joueur_2 != "Joueur 2")
 					save_partie();
@@ -326,7 +390,7 @@ function demarrer_partie(){
 		success : function(data){
 			var i =0;	
 			var j=0;
-			infos = data;
+			var infos = data;
 			var debut = infos.debut;
 			
 			for(key1 in infos.cartesJ1){

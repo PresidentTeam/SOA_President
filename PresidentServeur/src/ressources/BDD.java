@@ -24,7 +24,7 @@ public class BDD
 		conn = DriverManager.getConnection(url+dbName,userName,password);
 		stmt = conn.createStatement();
 	}
-	
+	 
 	public void closeConnection(){
 		try {
 			conn.close();
