@@ -81,9 +81,6 @@ public class Joueur {
             
             j = new Joueur(id, nom_bdd, prenom_bdd, login_bdd, mail_bdd, mdp_bdd, score_bdd);
             
-    		String requete = "UPDATE  joueur SET en_attente_partie = 0 WHERE login = '"+login+"'";
-    		stmt.executeUpdate(requete);
-            
         }
         return j.toJSON();
 	}

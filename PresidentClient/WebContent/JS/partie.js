@@ -6,6 +6,25 @@ var joueur_trouve = "";
 var moi = "";
 var id_joueur_trouve = "";
 var id_partie = "";
+var id_moi = "";
+var timer = "";
+
+//variables pour le jeu
+var passe_manche = false;
+var passe = false;
+var nb_cartes_moi = 26;
+var nb_cartes_lui = 26;
+var nb_tour = 0;
+var score = 0;
+var tapis = new Array();
+var cartes = new Array();
+var perdant = "";
+var debut = "";
+
+
+function annuler_boucle(){
+	clearInterval(timer);
+}
 
 function annuler(){
 	$.ajax({
@@ -13,9 +32,10 @@ function annuler(){
 		url : rootURL + '/Partie/Annuler',
 		dataType : 'json',
 		data: {
-			"login1": moi
+			"id1": id_moi
 		},
 		success : function(data){
+			annuler_boucle();
 			self.location.href = "./CreationPartie.html";
 		},
 		error: function(jqXHR, textStatus, errorThrown){
@@ -29,9 +49,21 @@ function joueur_infos(joueur, id){
 	id_joueur_trouve = id;
 }
 
+function ferme(){
+	moi = getCookie("CookieLogin");
+	
+	$.ajax({
+		type: 'POST',
+		url : rootURL + '/Partie/Annuler',
+		dataType : 'json',
+		data: {
+			"id1": id_moi
+		}
+	}); 
+}
+
 //rechercher une partie en ligne
 function jouer_ligne(){	
-	
 	moi = getCookie("CookieLogin");
 	
 	$.ajax({
@@ -43,7 +75,10 @@ function jouer_ligne(){
 		},
 		success : function(data){
 			var infos = data;
-			joueur_infos(infos.pseudo, infos.pseudo);
+	
+			id_moi = infos.id_moi;
+			
+			joueur_infos(infos.pseudo, infos.id_joueur);
 			jouer_ligne2();
 		},
 		error: function(jqXHR, textStatus, errorThrown){
@@ -60,11 +95,23 @@ function jouer_ligne2(){
 			url : rootURL + '/Partie/Lancer',
 			dataType : 'json',
 			data: {
-				"login1": moi,
+				"id1": id_moi,
 				"id2": id_joueur_trouve
 			},
 			success : function(data){
 				id_partie = data.id_partie;
+				if(data.debut == moi){
+					debut = 1;
+				}else{
+					debut = 0;
+				}
+				i = 0;
+				
+				for(key1 in data.cartes){
+					cartes[i] = data.cartes[key1];
+					i++;
+				}
+				commencer();
 			},
 			error: function(jqXHR, textStatus, errorThrown){
 				alert("Chemin non accessible :" + errorThrown);
@@ -81,11 +128,11 @@ function jouer_ligne2(){
 			url : rootURL + '/Partie/Creer',
 			dataType : 'json',
 			data: {
-				"login1": moi
+				"id1": id_moi
 			},
 			success : function(data){
-				//on boucle en questionnant le serveur 
-				alert('boucle');
+				//on boucle en questionnant le serveur
+				timer = setInterval(question_serveur, 10000);
 			},
 			error: function(jqXHR, textStatus, errorThrown){
 				alert("Chemin non accessible :" + errorThrown);
@@ -94,6 +141,90 @@ function jouer_ligne2(){
 	}
 }
 
+function commencer(){
+	cartes.sort(tri);
+	
+	j = 0;
+	for(carte in cartes){
+		document.getElementById('cartesHoriJ1').innerHTML += "<span id='carte_"+j+"' onclick='javascript:jouer_carte("+j+")'>"+cartes[carte]+"</span> ";
+		j++;
+	}
+	
+	demmarrer_partie_ligne();
+}
+
+//fonction pour savoir si un joueur veut jouer
+function question_serveur(){
+	$.ajax({
+		type: 'POST',
+		url : rootURL + '/Partie/Trouver',
+		dataType : 'json',
+		data: {
+			"id1": id_moi
+		},
+		success : function(data){
+			id_partie = data.id;
+			id_joueur_trouve = data.id2;
+			joueur_trouve = data.login2;
+			
+			if(id_partie != 0){
+				annuler_boucle();
+				getCartes();
+			}
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			alert("Chemin non accessible :" + errorThrown);
+		}
+	});
+}
+
+function getCartes(){
+	$.ajax({
+		type: 'GET',
+		url : rootURL + '/Partie/Cartes',
+		dataType : 'json',
+		data: {
+			"id1": id_moi,
+			"id_partie": id_partie
+		},
+		success : function(data){
+			i = 0;
+		
+			for(key1 in data.cartes){
+				cartes[i] = data.cartes[key1];
+				i++;
+			}
+			commencer();
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			alert("Chemin non accessible :" + errorThrown);
+		}
+	});
+}
+
+function demmarrer_partie_ligne(){
+	document.getElementById('recherche').style.display = 'none';
+	document.getElementById('plateau').style.display = 'block';
+	
+	document.getElementById('nomJoueur1').innerHTML = moi;
+	document.getElementById('nomJoueur2').innerHTML = joueur_trouve;
+	document.getElementById('nb_J1').innerHTML = " ("+nb_cartes_moi+" cartes)";
+	document.getElementById('nb_J2').innerHTML = " ("+nb_cartes_lui+" cartes)";
+}
+
+//le jeu
+
+function passer_ligne(){
+	if(passe){
+		passe = false;
+	}else{
+		passe_manche = true;
+	}
+}
+
+	
+//selection partie
+	
 /*$('#showPartieEnPause').click(function(){
 	var span = document.getElementById('showPartieEnPause');
 	var div = document.getElementById('PlayOnPause');

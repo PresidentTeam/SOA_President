@@ -18,6 +18,23 @@ function afficher_deconnexion(){
 	}
 }
 
+function tri(a, b){
+	a = a.substring(0, a.indexOf("C"));
+	b = b.substring(0, b.indexOf("C"));
+	
+	if(a == "2")	
+		return 1;
+	if(b == "2")	
+		return -1;
+	if(a == "1")
+		return 1;
+	if(b == "1")	
+		return -1;
+	
+	return parseInt(a) - parseInt(b);
+}
+
+
 $('#deco').click(function(){
 	eraseCookie("CookieLogin");
 	eraseCookie("CookieLogin2");

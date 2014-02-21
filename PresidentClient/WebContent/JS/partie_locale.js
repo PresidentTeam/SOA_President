@@ -100,22 +100,6 @@ function change_joueur(joueur){
 	}
 }
 
-function tri(a, b){
-	a = a.substring(0, a.indexOf("C"));
-	b = b.substring(0, b.indexOf("C"));
-	
-	if(a == "2")	
-		return 1;
-	if(b == "2")	
-		return -1;
-	if(a == "1")
-		return 1;
-	if(b == "1")	
-		return -1;
-	
-	return parseInt(a) - parseInt(b);
-}
-
 function change_nb_cartes(id_div, nb){
 	//affiche le nb de cartes des joueurs
 	document.getElementById(id_div).innerHTML = " ("+nb+" cartes)";

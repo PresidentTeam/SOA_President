@@ -72,25 +72,126 @@ public class Partie {
 			id = resultat.getInt("id");
 		}
 		
-		s += "\""+log+"\", \"id_joueur\":\""+id+"\"}";
+		String req = "Select id FROM joueur WHERE login = '"+ login +"';";
+		ResultSet res = stmt.executeQuery(req);
+		
+		int id_moi = 0;
+		
+		if(res.next()){
+			id_moi = res.getInt("id");
+		}
+		
+		
+		s += "\""+log+"\", \"id_moi\":\""+id_moi+"\", \"id_joueur\":\""+id+"\"}";
 		
 		//System.out.println("s : "+s);
 		
 		return Construction_response.Construct(200, s);
 	}
 	
+	@GET
+	@Path("Cartes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response ObtenirCartes(@QueryParam("id1") int id1, @QueryParam("id_partie") int id_partie) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		
+		
+		String req1 = "SELECT carte FROM cartes_tmp WHERE id_partie = "+id_partie+" AND id_joueur = "+id1;
+		
+		ResultSet resultat = stmt.executeQuery(req1);
+		
+		resultat.last();
+		//on recupere le numero de la ligne
+		int nb_lignes = resultat.getRow();
+		
+		resultat.beforeFirst();
+		
+		String carte = "";
+		
+		int i=0;
+
+		String s = "{\"cartes\" : [";
+		
+		while(resultat.next()){
+			carte = resultat.getString("carte");	
+			if(i!=0)
+				s+=",";
+			s+="\""+carte+"\""; 	
+			i++;
+		}
+
+		s+="]}";
+		
+		//on supprime les cartes dans la bdd
+		String requete = "DELETE FROM cartes_tmp WHERE id_partie = "+id_partie+" AND id_joueur = "+id1;
+		stmt.executeUpdate(requete);
+		
+		//System.out.println(" Cartes s : "+s);
+		
+		return Construction_response.Construct(200, s);
+	}
+	
+	
 	@POST
 	@Path("Lancer")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response LancerPartieLigne(@QueryParam("login1") String login1, @QueryParam("id2") int id2) throws ClassNotFoundException, SQLException{
-		
+	public Response LancerPartieLigne(@FormParam("id1") int id1, @FormParam("id2") int id2) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
 		//creer partie dans bdd
 		//retourner l'id
-		String s = "{ \"id_partie\" : ";
+		int id_debut = 0;
 		
+		int debut = (int) (Math.random() * 2);
+		
+		if(debut == 0){
+			id_debut = id1;
+		}else{
+			id_debut = id2;
+		}
+		
+		String requete = "INSERT INTO  partie "
+				+"(nbjoueur, etat, nbtour, debut) "
+				+"VALUES ('2', 'commence', '0', '"+id_debut+"');";
+		stmt.executeUpdate(requete);
+		
+		int nb = 0;
+		
+		ResultSet result = stmt.executeQuery("SELECT LAST_INSERT_ID() FROM partie");
+		
+		if(result.next())
+			nb = result.getInt(1);
+			
+		String s = "{ \"id_partie\" : \""+nb+"\", \"debut\" : \""+id_debut+"\", ";
+		
+		String req = "INSERT INTO  jouer "
+				+"(id_partie, id_joueur, scorepartie) "
+				+"VALUES ('"+nb+"', '"+id1+"', '0');";
+		stmt.executeUpdate(req);
+
+		String req2 = "INSERT INTO  jouer "
+				+"(id_partie, id_joueur, scorepartie) "
+				+"VALUES ('"+nb+"', '"+id2+"', '0');";
+		stmt.executeUpdate(req2);
+		
+		String cartes[] = tirage_cartes_2_joueurs(nb, id2);
+		
+		s += "\"cartes\" : [";
+				
+		//on convertit en json
+		for (int i=0; i<cartes.length; i++){
+			if(i!=0)
+				s+=",";
+			s+="\""+cartes[i].toString()+"\""; 	
+		}
+
+		s+="]";
 		s += "}";
 		
-		System.out.println("s : "+s);
+		//System.out.println(" insert into s : "+s);
 		
 		return Construction_response.Construct(201, s);
 	}
@@ -98,17 +199,58 @@ public class Partie {
 	@POST
 	@Path("Creer")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response AttendreJoueurLigne(@FormParam("login1") String login1) throws ClassNotFoundException, SQLException{
+	public Response AttendreJoueurLigne(@FormParam("id1") int id1) throws ClassNotFoundException, SQLException{
 		if(stmt == null){
 			new BDD();
 		}
 		
-		String requete = "UPDATE  joueur SET en_attente_partie = 1 WHERE login = '"+login1+"'";
+		String requete = "UPDATE  joueur SET en_attente_partie = 1 WHERE id = "+id1;
 		stmt.executeUpdate(requete);
 		
-		String s = "{ \" id \" : \" id \"";
+		String s = "{}";
 		
-		s += "}";
+		return Construction_response.Construct(201, s);
+	}
+	
+	//le joueur questionne régulièrement le serveur pour savoir si un autre joueur veut jouer
+	@POST
+	@Path("Trouver")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response PartieLigneTrouver(@FormParam("id1") int id1) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		
+		String req1 = "SELECT p.id FROM partie p INNER JOIN jouer j ON j.id_partie = p.id WHERE j.id_joueur = "+id1+" AND p.etat = 'commence'";
+		
+		ResultSet resultat = stmt.executeQuery(req1);
+		
+		int id = 0;
+		int id2 = 0;
+		String log2 = "";
+		
+		if(resultat.next()){
+			id = resultat.getInt("id");	
+			
+			String requete = "UPDATE  joueur SET en_attente_partie = 0 WHERE id = "+id1;
+			stmt.executeUpdate(requete);
+			
+			String req = "UPDATE partie SET etat = 'en cours' WHERE id = "+id;
+			stmt.executeUpdate(req);
+			
+			String req2 = "SELECT j.id, j.login FROM joueur j INNER JOIN jouer jo ON jo.id_joueur = j.id WHERE jo.id_partie = "+id;
+			
+			ResultSet result = stmt.executeQuery(req2);
+			
+			if(result.next()){
+				id2 = result.getInt("id");
+				log2 = result.getString("login");
+			}
+		}
+		
+		String s = "{ \"id\" : \""+id+"\", \"id2\" : \""+id2+"\", \"login2\" : \""+log2+"\"}";
+
+		//System.out.println(" s :"+s);
 		
 		return Construction_response.Construct(201, s);
 	}
@@ -116,17 +258,88 @@ public class Partie {
 	@POST
 	@Path("Annuler")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response AnnulerAttente(@FormParam("login1") String login1) throws ClassNotFoundException, SQLException{
+	public Response AnnulerAttente(@FormParam("id1") int id1) throws ClassNotFoundException, SQLException{
 		if(stmt == null){
 			new BDD();
 		}
 		
-		String requete = "UPDATE  joueur SET en_attente_partie = 0 WHERE login = '"+login1+"'";
+		String requete = "UPDATE joueur SET en_attente_partie = 0 WHERE id = "+id1;
 		stmt.executeUpdate(requete);
+		
+		//System.out.println("req :"+requete);
 		
 		return Construction_response.Construct(201, "{}");
 	}
 	
+	public String[] tirage_cartes_2_joueurs(int id_partie, int id_joueur) throws ClassNotFoundException, SQLException{
+		int nb_cartes_joueur = 26;
+		String cartes[] = recup_cartes();
+		String cartesJ1[] = new String[nb_cartes_joueur];
+		String cartesJ2[] = new String[nb_cartes_joueur];
+
+		int J1_taille = 0;
+		int J2_taille = 0;
+		int t=0;
+
+		//tirage aleatoire des cartes
+		for(t = 0; t<cartes.length && J1_taille<nb_cartes_joueur && J2_taille<nb_cartes_joueur;t++){
+			int joueur = (int) (Math.random() * 2); // 0 : carte pour J1, 1 : carte pour J2
+			if(joueur == 0){
+				cartesJ1[J1_taille] = cartes[t];
+				J1_taille ++;
+			}else{
+				cartesJ2[J2_taille] = cartes[t];
+				J2_taille ++;				
+			}
+		}
+		//si le joueur 1 a le maximum de cartes possible, on donne le reste au joueur 2
+		if(J1_taille == nb_cartes_joueur && J2_taille < nb_cartes_joueur){
+			while(t<cartes.length){
+				cartesJ2[J2_taille] = cartes[t];
+				J2_taille ++;	
+				t++;
+			}
+		}else if(J2_taille == nb_cartes_joueur && J1_taille < nb_cartes_joueur){
+			while(t<cartes.length){
+				cartesJ1[J1_taille] = cartes[t];
+				J1_taille ++;	
+				t++;
+			}
+		}
+
+		//on parcourt les cartes du J2 pour les enregistrer dans la bdd
+		for(int h=0; h<cartesJ2.length; h++){
+			String requete = "INSERT INTO  cartes_tmp "
+					+"(id_partie, id_joueur, carte) "
+					+"VALUES ('"+id_partie+"', '"+id_joueur+"', '"+cartesJ2[h]+"');";
+			stmt.executeUpdate(requete);
+		}
+
+		return cartesJ1;
+	}
+
+	public String[] recup_cartes() throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		String cartes[] = new String[52];
+
+
+		ResultSet resultat = stmt.executeQuery("SELECT libelle FROM carte;"); 
+		resultat.last();
+		//on rï¿½cupï¿½re le numï¿½ro de la ligne
+		int nb_lignes = resultat.getRow();
+		//on replace le curseur avant la premiï¿½re ligne
+		resultat.beforeFirst();
+
+		// Rï¿½cupï¿½ration des donnï¿½es du rï¿½sultat de la requï¿½te de lecture 
+		for(int i=0; i < nb_lignes;i++){
+			resultat.next();   
+			cartes[i] = resultat.getString("libelle");
+		}
+
+		return cartes;
+	}
 	public int getIdPartie(){return this.idPartie;}
 	public int getNbTour(){return this.nb_tour;}
 	public int getScore1(){return this.score1;}

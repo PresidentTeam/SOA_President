@@ -6,23 +6,37 @@
 <link rel="stylesheet" media="screen" type="text/css" title="Exemple"
 	href="Globaldesign.css" />
 </head>
-<body onload='javascipt:afficher_deconnexion();'>
-	<div id="deconnexion" style="display:none">
-		Bienvenue <span id="nom"></span> !
-		<button id="deco">Déconnexion</button>
-	</div>
-	<div>
-		<h3>Jeu du président</h3>
-	</div>
-
-	<div id="attenteJoueur" style="display: none;">
-		<h4>En attente d'un joueur ...</h4>
-	</div>
-	<div id="action">
-		<button id="jouer_ligne" onClick="javascript:jouer_ligne();">Jouer</button><button id="jouer_ami">Jouer avec un ami</button>
-		<button id="deco" onClick="javascript:self.location.href = './Menu.html';">Retour</button>
-	</div>
+<body onload='javascipt:afficher_deconnexion();' onbeforeunload='javascript:ferme();'>
+	<div id="recherche">
+		<div id="deconnexion" style="display:none">
+			Bienvenue <span id="nom"></span> !
+			<button id="deco">Déconnexion</button>
+		</div>
+		<div>
+			<h3>Jeu du président</h3>
+		</div>
 	
+		<div id="attenteJoueur" style="display: none;">
+			<h4>En attente d'un joueur ...</h4>
+		</div>
+		<div id="action">
+			<button id="jouer_ligne" onClick="javascript:jouer_ligne();">Jouer</button><button id="jouer_ami">Jouer avec un ami</button>
+			<button id="deco" onClick="javascript:self.location.href = './Menu.html';">Retour</button>
+		</div>
+	</div>
+	<div id="plateau" style="display: none;">
+		<div id="joueur2">
+			<center><div class="nomJoueurs" id="nomJoueur2"></div><span id="nb_J2"></span></center>
+		</div>
+		<div id="plateau2">
+		</div>
+		<div id="joueur1">
+			<div class="cartesHori">
+				<div class="cartesHori" id="cartesHoriJ1"></div>
+			</div>
+			<center><div class="nomJoueurs" id="nomJoueur1"></div><button id="pass_1" onClick="javascript:passer_ligne();">Passer</button><span id="nb_J1"></span></center>
+		</div>
+	</div>
 	
 	<script src="./JS/jquery-1.10.2.js"></script>
 	<script src="./JS/main.js"></script>
