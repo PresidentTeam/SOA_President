@@ -15,7 +15,7 @@ var nb_cartes_J2 = null;
 var nb_tour = 0;
 var score_J1 = 0;
 var score_J2 =0;
-var id_partie = null;
+var id_partie = 0;
 var tapis = new Array();
 var passe = false;
 var passe_manche_J1 = false;
@@ -23,7 +23,8 @@ var passe_manche_J2 = false;
 var perdant = "";
 
 function vide_variable(){
-	tapis = "";
+	id_partie = 0;
+	tapis = new Array();
 	passe = false;
 	passe_manche_J1 = false;
 	passe_manche_J2 = false;
@@ -40,6 +41,7 @@ function vide_variable(){
 }
 
 $('#retour_co_locale').click(function(){
+	ferme();
 	vide_variable();
 	self.location.href = './ConnexionLocale.html';
 });
@@ -105,29 +107,43 @@ function change_nb_cartes(id_div, nb){
 	document.getElementById(id_div).innerHTML = " ("+nb+" cartes)";
 }
 
-function save_partie (){
-	//on cree la partie dans la bdd ou on l'update
-	
-	/*$.ajax({
-		type: 'PUT',
-		contentType: 'application/json',
-		url : rootURL + '/Jouer/SauverLocal',
+//quand on ferme la page on enregistre la partie
+function ferme(){
+	$.ajax({
+		type: 'POST',
+		url : rootURL + '/Jouer/QuitterLocal',
 		dataType : 'json',
-		data: toJSON(),
+		data: {
+			"nb_tour": nb_tour, 
+			"id_partie": id_partie
+		},
 		error: function(jqXHR, textStatus, errorThrown){
 			alert("Chemin non accessible :" + errorThrown + " " + jqXHR.status);
 		}
-	});*/
+	});
+}
+function save_partie (){
+	//on update la partie dans la bdd
+	
+	$.ajax({
+		type: 'POST',
+		url : rootURL + '/Jouer/SauverLocal',
+		dataType : 'json',
+		data: {
+			"login1": joueur_1, 
+			"login2": joueur_2,
+			"score1": score_J1,
+			"score2": score_J2,
+			"id_partie": id_partie
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			alert("Chemin non accessible :" + errorThrown + " " + jqXHR.status);
+		}
+	});
 }
 
 function toJSON() {
-	return JSON.stringify({
-		"login1": joueur_1, 
-		"login2": joueur_2,
-		"score1": score_J1,
-		"score2": score_J2,
-		"nb_tour": nb_tour
-		});
+	return JSON.stringify();
 }
 
 function new_tour(){
@@ -138,7 +154,7 @@ function new_tour(){
 	document.getElementById('plateau2').innerHTML = '';
 	document.getElementById('cartesHoriJ1').innerHTML = '';
 	document.getElementById('cartesHoriJ2').innerHTML = '';
-	tapis = "";
+	tapis = new Array();
 	passe = false;
 	passe_manche_J1 = false;
 	passe_manche_J2 = false;
@@ -152,7 +168,6 @@ function new_tour(){
 		url : rootURL + '/Jouer/NouveauTourLocal',
 		dataType : 'json',
 		success : function(data){
-			alert("success");
 			var i =0;	
 			var j=0;
 			var infos = data;
@@ -237,22 +252,43 @@ function passer(j){
 	if(j == "J1"){
 		if(passe){
 			passe = false;
+			change_joueur("J2");
 		}else{
 			passe_manche_J1 = true;
+			
+			if(passe_manche_J2){
+				vider_tapis();
+			}else{
+				change_joueur("J2");
+			}
 		}
-		change_joueur("J2");
 	}else{
 		if(passe){
 			passe = false;
+			change_joueur("J1");
 		}else{
 			passe_manche_J2 = true;
+			
+			if(passe_manche_J1){
+				vider_tapis();
+			}else{
+				change_joueur("J1");
+			}
 		}
-		change_joueur("J1");
 	}
 }
 
+function vider_tapis(){
+	tapis = new Array();
+	document.getElementById('plateau2').innerHTML = "";
+
+	passe_manche_J2 = false;
+	passe_manche_J1 = false;
+	passe = false;
+}
+
 function jouer_carte(joueur, num_carte){
-	//alert("jeu : "+num_carte+" de "+joueur);
+	
 	val_1 = val_2 = val_3 = 0;
 	
 	//on recupere la valeur d'au max les 3 dernieres cartes du tapis
@@ -270,15 +306,15 @@ function jouer_carte(joueur, num_carte){
 		val = cartes1[num_carte].substring(0, cartes1[num_carte].indexOf("C"));
 		
 		//si la carte voulu est + petite que la derniere sur le tapis
-		if((tapis.length == 0 || tri(cartes1[num_carte], tapis[tapis.length-1]) != -1) && (!passe || val_1 == val)){
+		if((tapis.length == 0 || tri(cartes1[num_carte], tapis[tapis.length-1]) >= 0) && (!passe || val_1 == val)){
 			nb_cartes_J1 -=1;
 			change_nb_cartes("nb_J1", nb_cartes_J1);
 			document.getElementById('carte1_'+num_carte).style.display = 'none';
 			carte_tapis(cartes1[num_carte]);
 			
 			if(nb_cartes_J1 ==0){ //si le J1 a gagné
-				score_J2 -= 2;
-				score_J1 += 2;
+				score_J2 = -2;
+				score_J1 = 2;
 				
 				perdant = "J2";
 				
@@ -292,12 +328,7 @@ function jouer_carte(joueur, num_carte){
 				
 				// si on joue un 2 ou que les 4 cartes de meme valeur sont posees, le jeu se ferme (on vide le tapis)
 				if(val == "2" || (val_1 == val_2 && val_2 == val_3 && val_3 == val)){
-					tapis = "";
-					document.getElementById('plateau2').innerHTML = "";
-
-					passe_manche_J2 = false;
-					passe_manche_J1 = false;
-					
+					vider_tapis();
 					change_joueur("J1");
 				}else{
 					if(val == val_1)
@@ -313,15 +344,15 @@ function jouer_carte(joueur, num_carte){
 	}else{
 		val = cartes2[num_carte].substring(0, cartes2[num_carte].indexOf("C"));
 		
-		if((tapis.length == 0 || tri(cartes2[num_carte], tapis[tapis.length-1]) != -1) && (!passe || val_1 == val)){
+		if((tapis.length == 0 || tri(cartes2[num_carte], tapis[tapis.length-1]) >= 0) && (!passe || val_1 == val)){
 			nb_cartes_J2 -=1;
 			change_nb_cartes("nb_J2", nb_cartes_J2);
 			document.getElementById('carte2_'+num_carte).style.display = 'none';
 			carte_tapis(cartes2[num_carte]);
 			
 			if(nb_cartes_J2 ==0){ //si le J2 a gagné
-				score_J1 -= 2;
-				score_J2 += 2;
+				score_J1 = -2;
+				score_J2 = 2;
 				
 				perdant = "J1";
 				
@@ -334,14 +365,13 @@ function jouer_carte(joueur, num_carte){
 			}else{	
 				
 				if(val == "2" || (val_1 == val_2 && val_2 == val_3 && val_3 == val)){
-					tapis = "";
-					document.getElementById('plateau2').innerHTML = "";
-					
-					passe_manche_J2 = false;
-					passe_manche_J1 = false;
+					vider_tapis();
 					
 					change_joueur("J2");
 				}else{
+					if(val == val_1)
+						passe = true;
+				
 					if(!passe_manche_J1)
 						change_joueur("J1");
 				}
@@ -372,6 +402,9 @@ function demarrer_partie(){
 			"login2": joueur_co_2 
 		},
 		success : function(data){
+
+			id_partie = data.id_partie;
+			
 			var i =0;	
 			var j=0;
 			var infos = data;

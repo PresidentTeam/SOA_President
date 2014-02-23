@@ -221,16 +221,18 @@ public class Partie {
 			new BDD();
 		}
 		
-		String req1 = "SELECT p.id FROM partie p INNER JOIN jouer j ON j.id_partie = p.id WHERE j.id_joueur = "+id1+" AND p.etat = 'commence'";
+		String req1 = "SELECT p.id, p.debut FROM partie p INNER JOIN jouer j ON j.id_partie = p.id WHERE j.id_joueur = "+id1+" AND p.etat = 'commence'";
 		
 		ResultSet resultat = stmt.executeQuery(req1);
 		
 		int id = 0;
 		int id2 = 0;
 		String log2 = "";
+		int debut = 0;
 		
 		if(resultat.next()){
 			id = resultat.getInt("id");	
+			debut = resultat.getInt("debut");
 			
 			String requete = "UPDATE  joueur SET en_attente_partie = 0 WHERE id = "+id1;
 			stmt.executeUpdate(requete);
@@ -248,7 +250,7 @@ public class Partie {
 			}
 		}
 		
-		String s = "{ \"id\" : \""+id+"\", \"id2\" : \""+id2+"\", \"login2\" : \""+log2+"\"}";
+		String s = "{ \"id\" : \""+id+"\", \"id2\" : \""+id2+"\", \"login2\" : \""+log2+"\", \"debut\" : \""+debut+"\"}";
 
 		//System.out.println(" s :"+s);
 		
@@ -340,6 +342,93 @@ public class Partie {
 
 		return cartes;
 	}
+	
+	//pendant la partie en ligne
+	@POST
+	@Path("JouerCarte")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response JouerCarte(@FormParam("id1") int id1, @FormParam("id_partie") int id_partie, @FormParam("carte") String carte, @FormParam("etat") String etat) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		
+		String requete = "INSERT INTO action (id_joueur, id_partie, libelle_carte, etat) VALUES ('"+id1+"', '"+id_partie+"', '"+carte+"', '"+etat+"');";
+		stmt.executeUpdate(requete);
+		
+		//System.out.println("req :"+requete);
+		
+		return Construction_response.Construct(201, "{}");
+	}
+	
+	@GET
+	@Path("AttendreCarte")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response AttendreCarte(@QueryParam("id1") int id1, @QueryParam("id_partie") int id_partie) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		
+		int nouveau = 0;
+		String libel = "";
+		String etat = "";
+		
+		String req1 = "SELECT id, libelle_carte, etat FROM action WHERE id_partie = "+id_partie+" AND id_joueur != "+id1+" ORDER BY id";
+		
+		ResultSet resultat = stmt.executeQuery(req1);
+		
+		if(resultat.next()){
+			nouveau = 1;
+			int id = resultat.getInt("id");	
+			libel = resultat.getString("libelle_carte");
+			etat = resultat.getString("etat");
+			
+			stmt.executeUpdate("DELETE FROM action WHERE id="+id);
+		}
+		
+		String s = "{\"nouveau\" : \""+nouveau+"\", \"carte\" : \""+libel+"\", \"etat\" : \""+etat+"\"}";
+		
+		//on supprime l'action dans la bdd
+		String requete = "DELETE FROM cartes_tmp WHERE id_partie = "+id_partie+" AND id_joueur = "+id1;
+		stmt.executeUpdate(requete);
+		
+		//System.out.println(" Attente Cartes s : "+s);
+		
+		return Construction_response.Construct(200, s);
+	}
+	
+	@POST
+	@Path("Sauver")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response SauverScore(@FormParam("id1") int id1, @FormParam("id_partie") int id_partie, @FormParam("score") int score) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		
+		//on met a jour le score lie a la partie
+		stmt.executeUpdate("UPDATE jouer SET scorepartie = scorepartie+"+score+" WHERE id_partie = "+id_partie+" AND id_joueur = "+id1);
+		
+		//on met a jour le score total du joueur
+		stmt.executeUpdate("UPDATE joueur SET score = score+"+score+" WHERE id = "+id1);
+		
+		//System.out.println("req :"+requete);
+		
+		return Construction_response.Construct(201, "{}");
+	}
+	
+	@POST
+	@Path("Quitter")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response QuitterLocal(@FormParam("nb_tour") int nb_tour, @FormParam("id_partie") int id_partie) throws SQLException, ClassNotFoundException{ 
+		if(stmt == null){
+			new BDD();
+		}
+		
+		stmt.executeUpdate("UPDATE partie SET nbtour = "+nb_tour+", etat = 'termine' WHERE id = "+id_partie);
+		
+		return Construction_response.Construct(201, "{}");
+	}
+	
+	
 	public int getIdPartie(){return this.idPartie;}
 	public int getNbTour(){return this.nb_tour;}
 	public int getScore1(){return this.score1;}

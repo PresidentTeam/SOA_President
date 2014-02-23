@@ -5,7 +5,7 @@
 <title>Jeu du président</title>
 <link rel="stylesheet" media="screen" type="text/css" title="Exemple" href="./Globaldesign.css" />
 </head>
-<body onload='javascipt:afficher_deconnexion(); afficher_noms(); demarrer_partie();'>
+<body onbeforeunload='javascript:ferme();' onload='javascipt:afficher_deconnexion(); afficher_noms(); demarrer_partie();'>
 	<div id="deconnexion" style="display:none">
 		Bienvenue <span id="nom"></span> <span id="nom_joueur_2"></span>
 		<button id="deco" onClick="javascript:vide_variable();">Déconnexion</button>

@@ -25,16 +25,20 @@
 		</div>
 	</div>
 	<div id="plateau" style="display: none;">
+	 <button id='enregistrer_ligne'>Enregistrer la partie</button>
 		<div id="joueur2">
 			<center><div class="nomJoueurs" id="nomJoueur2"></div><span id="nb_J2"></span></center>
 		</div>
 		<div id="plateau2">
 		</div>
+		<div id="infos_tour"></div>
 		<div id="joueur1">
 			<div class="cartesHori">
 				<div class="cartesHori" id="cartesHoriJ1"></div>
 			</div>
-			<center><div class="nomJoueurs" id="nomJoueur1"></div><button id="pass_1" onClick="javascript:passer_ligne();">Passer</button><span id="nb_J1"></span></center>
+			<center><div class="nomJoueurs" id="nomJoueur1"></div><button id="bouton_1" onClick="javascript:passer_ligne();">Passer</button><span id="nb_J1"></span></center>
+			<div id="infos_moi" style="display:none">Vous avez passé votre tour pour cette manche</div>
+			<div id="infos_lui" style="display:none">Votre adversaire a passé son tour pour cette manche</div>
 		</div>
 	</div>
 	

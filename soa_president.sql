@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Serveur: localhost
--- Généré le : Jeu 20 Février 2014 à 21:10
+-- Généré le : Dim 23 Février 2014 à 23:05
 -- Version du serveur: 5.1.37
 -- Version de PHP: 5.3.0
 
@@ -12,6 +12,26 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Base de données: `soa_president`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `action`
+--
+
+CREATE TABLE IF NOT EXISTS `action` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_joueur` int(11) NOT NULL,
+  `id_partie` int(11) NOT NULL,
+  `libelle_carte` varchar(10) NOT NULL,
+  `etat` varchar(25) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+
+--
+-- Contenu de la table `action`
+--
+
 
 -- --------------------------------------------------------
 
@@ -88,6 +108,23 @@ INSERT INTO `carte` (`id`, `numero`, `couleur`, `libelle`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `cartes_tmp`
+--
+
+CREATE TABLE IF NOT EXISTS `cartes_tmp` (
+  `id_partie` int(11) NOT NULL,
+  `id_joueur` int(11) NOT NULL,
+  `carte` varchar(25) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Contenu de la table `cartes_tmp`
+--
+
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `jouer`
 --
 
@@ -139,8 +176,9 @@ CREATE TABLE IF NOT EXISTS `partie` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nbjoueur` int(11) NOT NULL,
   `etat` varchar(100) NOT NULL,
-  `datedebut` date NOT NULL,
+  `datedebut` date NOT NULL DEFAULT '0000-00-00',
   `nbtour` int(11) NOT NULL,
+  `debut` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 

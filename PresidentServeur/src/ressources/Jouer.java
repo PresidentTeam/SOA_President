@@ -25,7 +25,37 @@ public class Jouer {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response JouerLocal(@QueryParam("login1") String login1, @QueryParam("login2") String login2) throws ClassNotFoundException, SQLException{
 		String s = tirage_cartes_2_joueurs();
-
+		int id_j1 = 0;
+		int id_j2 = 0;
+		
+		
+		if(login2 != "Joueur 2"){
+			int id = 0;
+			id_j1 = getIdjoueurFromLogin(login1);
+			id_j2 = getIdjoueurFromLogin(login2);
+			
+			String requete = "INSERT INTO  partie "
+					+"(nbjoueur, etat, nbtour, debut) "
+					+"VALUES ('2', 'en cours', '0', '0');";
+			stmt.executeUpdate(requete);
+			
+			ResultSet result = stmt.executeQuery("SELECT LAST_INSERT_ID() FROM partie");
+			
+			if(result.next()){
+				id = result.getInt(1);
+				String req = "INSERT INTO  jouer "
+						+"(id_partie, id_joueur, scorepartie) "
+						+"VALUES ('"+id+"', '"+id_j1+"', '0');";
+				stmt.executeUpdate(req);
+				
+				stmt.executeUpdate("INSERT INTO jouer (id_partie, id_joueur, scorepartie) VALUES ('"+id+"', '"+id_j2+"', '0')");
+				
+				s += ", \"id_partie\": \""+id+"\"}";
+			}
+			
+		}else{
+			s += "}";
+		}
 		return Construction_response.Construct(200, s);
 	}
 
@@ -34,97 +64,57 @@ public class Jouer {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response Nouveau_Local() throws ClassNotFoundException, SQLException{
 		String s = tirage_cartes_2_joueurs();
-
+		s += "}";
 		return Construction_response.Construct(200, s);
 	}
-
-	@PUT
-	@Path("SauverLocal")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response SauverLocal(Partie p) throws SQLException{ 
-		System.out.println("J2 : "+p.getlogin2());
-		String login2 = p.getlogin2();
-		String login1 = p.getlogin1();
+	
+	@POST
+	@Path("QuitterLocal")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response QuitterLocal(@FormParam("nb_tour") int nb_tour, @FormParam("id_partie") int id_partie) throws SQLException, ClassNotFoundException{ 
+		if(stmt == null){
+			new BDD();
+		}
 		
-		int idJoueur1 = getIdjoueurFromLogin(login1);
-		int idJoueur2 = getIdjoueurFromLogin(login2);
-
-		if(!login2.equals("Joueur 2")){
-			if(VerifPartieExistante(login1, login2) != null){
-				//creer la partie dans la bdd
-				String requete = "INSERT INTO  partie "
-						+"(nbjoueur, etat, nbtour) "
-						+"VALUES ('2', 'en cours', '1');";
-				int nb = stmt.executeUpdate(requete, Statement.RETURN_GENERATED_KEYS);
-				System.out.println("nb : "+nb);
-				
-				//récupérer l'id de la partie créer
-				ResultSet rs = stmt.getGeneratedKeys();
-				int id = 0;
-				while(rs.next()){
-					id = rs.getInt(1);
-					System.out.println(id);
-				}
-				
-				//Ajout de la partie dans les sauvegardes
-				String insertJ1 = "INSERT INTO  jouer "
-						+"(id_partie, id_joueur, scorepartie) "
-						+"VALUES ("+id+","+idJoueur1+", 0);";
-				int J1 = stmt.executeUpdate(insertJ1);
-				System.out.println("Ajout partie avec J1 : "+J1);
-
-				String insertJ2 = "INSERT INTO  jouer "
-						+"(id_partie, id_joueur, scorepartie) "
-						+"VALUES ("+id+","+idJoueur2+", 0);"; 
-				int J2 = stmt.executeUpdate(insertJ2);
-				System.out.println("Ajout partie avec J2 : "+J2);
-			}
-			else {
-				String updateJ1 = "UPDATE jouer SET scorepartie = "+p.getScore1()+"WHERE id_joueur = "+idJoueur1+";";
-				int updateValJ1 = stmt.executeUpdate(updateJ1);
-				System.out.println("Update score J1 : "+updateValJ1);
-				String updateJ2 = "UPDATE jouer SET scorepartie = "+p.getScore2()+"WHERE id_joueur = "+idJoueur2+";"; 
-				int updateValJ2 = stmt.executeUpdate(updateJ2);
-				System.out.println("Update score J2 : "+updateValJ2);
-			}
-
+		stmt.executeUpdate("UPDATE partie SET nbtour = "+nb_tour+", etat = 'termine' WHERE id = "+id_partie);
+		
+		return Construction_response.Construct(201, "{}");
+	}
+	
+	
+	@POST
+	@Path("SauverLocal")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response SauverLocal(@FormParam("login1") String login1, @FormParam("login2") String login2, @FormParam("id_partie") int id_partie, @FormParam("score1") int score1, @FormParam("score2") int score2) throws SQLException, ClassNotFoundException{ 
+		if(stmt == null){
+			new BDD();
 		}
-		return Construction_response.Construct(201, "");
+		
+		int id_j1 = getIdjoueurFromLogin(login1);
+		int id_j2 = getIdjoueurFromLogin(login2);
+		
+		//on met a jour le score lie a la partie
+		stmt.executeUpdate("UPDATE jouer SET scorepartie = scorepartie+"+score1+" WHERE id_partie = "+id_partie+" AND id_joueur = "+id_j1);
+		stmt.executeUpdate("UPDATE jouer SET scorepartie = scorepartie+"+score2+" WHERE id_partie = "+id_partie+" AND id_joueur = "+id_j2);
+		
+		//on met a jour le score total du joueur
+		stmt.executeUpdate("UPDATE joueur SET score = score+"+score1+" WHERE id = "+id_j1);
+		stmt.executeUpdate("UPDATE joueur SET score = score+"+score2+" WHERE id = "+id_j2);
+		
+		//System.out.println("req :"+requete);
+		return Construction_response.Construct(201, "{}");
 	}
 
-	public String VerifPartieExistante(String log1, String log2) throws SQLException{
-		String res = null;
-		String partie[] = new String[6];
-		// verifie qu'une partie existe pour le joueur 1
-		String requete1 = "Select id_partie FROM jouer WHERE id_joueur = "+ log1 +";";
-		ResultSet resultat = stmt.executeQuery(requete1);
-
-		//on r�cup�re le num�ro de la ligne
-		int nb_lignes = resultat.getRow();
-		//on replace le curseur avant la premi�re ligne
-		resultat.beforeFirst();
-
-		// R�cup�ration des donn�es du r�sultat de la requ�te de lecture 
-		for(int i=0; i < nb_lignes;i++){
-			resultat.next();   
-			partie[i] = resultat.getString("id_partie");
-			String requete2 = "Select id_partie FROM jouer WHERE id_joueur = "+ log2 +" and id_partie = "+partie[i]+";";
-			ResultSet resultat2 = stmt.executeQuery(requete2);
-			int partieExiste = resultat2.getRow();
-			if(partieExiste != 0)
-				res = resultat2.getString("id_partie");
-		}
-		return res;
-	}
 
 	public int getIdjoueurFromLogin(String log) throws SQLException{
 		int idjoueur = -1;
 		// récupère l'id_joueur si il existe
-		String requete = "Select id_joueur FROM joueur WHERE login = "+ log +";";
+		String requete = "Select id FROM joueur WHERE login = '"+ log +"';";
 		ResultSet rs = stmt.executeQuery(requete);
-		int joueurExiste = rs.getRow();
-		if(joueurExiste != 0)
-			idjoueur = rs.getInt(1);
+
+		if(rs.next()){
+			idjoueur = rs.getInt("id");
+		}
 		return idjoueur;
 	}
 
@@ -185,9 +175,9 @@ public class Jouer {
 
 		int debut = (int) (Math.random() * 2);
 		if(debut == 0){
-			s+="\"debut\":\"J1\"}";
+			s+="\"debut\":\"J1\"";
 		}else{
-			s+="\"debut\":\"J2\"}";
+			s+="\"debut\":\"J2\"";
 		}
 
 		//System.out.println("s : "+s);
