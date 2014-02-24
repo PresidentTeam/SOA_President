@@ -13,19 +13,26 @@
 			<button id="deco">Déconnexion</button>
 		</div>
 		<div>
-			<h3>Jeu du président</h3>
+			<h3 class="h3">Jeu du président</h3>
 		</div>
 	
 		<div id="attenteJoueur" style="display: none;">
 			<h4>En attente d'un joueur ...</h4>
 		</div>
 		<div id="action">
-			<button id="jouer_ligne" onClick="javascript:jouer_ligne();">Jouer</button><button id="jouer_ami">Jouer avec un ami</button>
-			<button id="deco" onClick="javascript:self.location.href = './Menu.html';">Retour</button>
+			<button id="jouer_ligne" onClick="javascript:jouer_ligne();" class="bouton">Jouer</button><br/><br/>
+			<button id="deco" onClick="javascript:self.location.href = './SelectionPartie.html';" class="bouton">Retour</button><div class="bouton">
+			<div class="PartieAFinir">
+				<p>Parties en pause <span id="showPartieEnPause">+</span></p>
+				<div>
+					<ul id="PlayOnPause" style="display:none">
+					</ul>
+				</div>
+			</div>
+		</div>
 		</div>
 	</div>
 	<div id="plateau" style="display: none;">
-	 <button id='enregistrer_ligne'>Enregistrer la partie</button>
 		<div id="joueur2">
 			<center><div class="nomJoueurs" id="nomJoueur2"></div><span id="nb_J2"></span></center>
 		</div>
@@ -41,7 +48,6 @@
 			<div id="infos_lui" style="display:none">Votre adversaire a passé son tour pour cette manche</div>
 		</div>
 	</div>
-	
 	<script src="./JS/jquery-1.10.2.js"></script>
 	<script src="./JS/main.js"></script>
 	<script src="./JS/partie.js"></script>

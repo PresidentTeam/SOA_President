@@ -43,9 +43,7 @@ public class Jouer {
 			
 			if(result.next()){
 				id = result.getInt(1);
-				String req = "INSERT INTO  jouer "
-						+"(id_partie, id_joueur, scorepartie) "
-						+"VALUES ('"+id+"', '"+id_j1+"', '0');";
+				String req = "INSERT INTO jouer (id_partie, id_joueur, scorepartie) VALUES ('"+id+"', '"+id_j1+"', '0');";
 				stmt.executeUpdate(req);
 				
 				stmt.executeUpdate("INSERT INTO jouer (id_partie, id_joueur, scorepartie) VALUES ('"+id+"', '"+id_j2+"', '0')");
@@ -81,6 +79,61 @@ public class Jouer {
 		return Construction_response.Construct(201, "{}");
 	}
 	
+	@POST
+	@Path("PauseLocal")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response PauseLocal(
+		@FormParam("nb_tour") int nb_tour, 
+		@FormParam("id_partie") int id_partie, 
+		@FormParam("tour") String tour, 
+		@FormParam("login1") String login1, 
+		@FormParam("login2") String login2, 
+		@FormParam("cartesJ1") String cartes1, 
+		@FormParam("cartesJ2") String cartes2, 
+		@FormParam("tapis") String tapis) throws SQLException, ClassNotFoundException{ 
+		
+		if(stmt == null){
+			new BDD();
+		}
+		
+		String cart1[] = cartes1.split(",");
+		String cart2[] = cartes2.split(",");
+		String tap[] = tapis.split(",");
+		
+		
+		int id_j1 = getIdjoueurFromLogin(login1);
+		int id_j2 = getIdjoueurFromLogin(login2);
+		
+		int doit_jouer;
+		
+		if(tour.equals("J1")){
+			doit_jouer = id_j1;
+		}else{
+			doit_jouer = id_j2;			
+		}
+		
+		for (int i = 0; i < cart1.length; i++) {
+		    String element = cart1[i];
+			stmt.executeUpdate("INSERT INTO sauvegarde (id_partie, id_joueur, libelle_carte) VALUES ('"+id_partie+"', '"+id_j1+"', '"+element+"')");
+		    
+		}
+		
+		for (int j = 0; j < cart2.length; j++) {
+		    String element = cart2[j];
+			stmt.executeUpdate("INSERT INTO sauvegarde (id_partie, id_joueur, libelle_carte) VALUES ('"+id_partie+"', '"+id_j2+"', '"+element+"')");
+		    
+		}
+		
+		for (int k = 0; k < tap.length; k++) {
+		    String element = tap[k];
+			stmt.executeUpdate("INSERT INTO sauvegarde (id_partie, id_joueur, libelle_carte) VALUES ('"+id_partie+"', '0', '"+element+"')");
+		    
+		}
+
+		stmt.executeUpdate("UPDATE partie SET nbtour = "+nb_tour+", etat = 'pause', doit_jouer = "+doit_jouer+" WHERE id = "+id_partie);
+		
+		return Construction_response.Construct(201, "{}");
+	}
 	
 	@POST
 	@Path("SauverLocal")

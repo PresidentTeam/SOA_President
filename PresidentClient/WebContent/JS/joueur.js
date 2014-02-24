@@ -98,13 +98,14 @@ function InscrireJoueur(){
 	$.ajax({
 		type: 'PUT',
 		contentType : 'application/json',
-		url: rootURL + 'ajoutJoueur/',
+		url: rootURL + '/Joueur/ajoutJoueur',
 		dataType: 'json',
 		data : joueurFormToJSON(),
 		success : function(data, textStatus, jqXHR){
 			alert('Joueur inscrit');
 		},
 		error : function(jqHXR, testStatus, errorThrown){
+			document.getElementById("erreurPwd").innerHTML("Login already use");
 			alert('Probleme d\'inscription');
 		}
 	});

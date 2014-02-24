@@ -1,9 +1,12 @@
-﻿-- phpMyAdmin SQL Dump
+﻿Serveur: localhost Base de données: soa_president 
+
+
+-- phpMyAdmin SQL Dump
 -- version 3.2.1
 -- http://www.phpmyadmin.net
 --
 -- Serveur: localhost
--- Généré le : Dim 23 Février 2014 à 23:05
+-- Généré le : Lun 24 Février 2014 à 22:15
 -- Version du serveur: 5.1.37
 -- Version de PHP: 5.3.0
 
@@ -26,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `action` (
   `libelle_carte` varchar(10) NOT NULL,
   `etat` varchar(25) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Contenu de la table `action`
@@ -179,6 +182,7 @@ CREATE TABLE IF NOT EXISTS `partie` (
   `datedebut` date NOT NULL DEFAULT '0000-00-00',
   `nbtour` int(11) NOT NULL,
   `debut` int(11) NOT NULL,
+  `doit_jouer` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -195,8 +199,8 @@ CREATE TABLE IF NOT EXISTS `partie` (
 
 CREATE TABLE IF NOT EXISTS `sauvegarde` (
   `id_partie` int(11) NOT NULL,
-  `id_carte` int(11) NOT NULL,
-  `id_joueur` int(11) NOT NULL
+  `id_joueur` int(11) NOT NULL,
+  `libelle_carte` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -224,3 +228,5 @@ CREATE TABLE IF NOT EXISTS `statistique` (
 -- Contenu de la table `statistique`
 --
 
+
+ 

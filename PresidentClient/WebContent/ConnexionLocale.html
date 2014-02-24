@@ -8,10 +8,10 @@
 <body onload='javascipt:afficher_deconnexion(); afficher_connex();'>
 	<div id="deconnexion" style="display:none">
 		Bienvenue <span id="nom"></span> !
-		<button id="deco">Déconnexion</button>
+		<button class="bouton" id="deco">Déconnexion</button>
 	</div>
 	<div>
-		<h3>Jeu du président</h3>
+		<h3 class="h3">Jeu du président</h3>
 	</div>
 	<div class="Connexion" id="connex" style="display:none">
 		<ul>
@@ -27,9 +27,9 @@
 		<button id="deco_2" onClick="javascript:deco_joueur2();">Déconnecter <span id="deco_nom_2"></span></button>
 	</div>
 	<div class="Inscription">
-		<button id="retour_selection">Retour</button>
+		<button id="retour_selection" class="bouton">Retour</button>
 	</div>
-	
+	<link rel="stylesheet" media="screen" type="text/css" title="Exemple" href="./Globaldesign.css" />
 	<script src="JS/jquery-1.10.2.js"></script>
 	<script src="JS/partie_locale.js"></script>
 	<script src="JS/joueur.js"></script>

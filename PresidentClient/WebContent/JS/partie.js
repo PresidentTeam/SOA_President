@@ -13,8 +13,8 @@ var timer = "";
 var passe_manche_lui = false;
 var passe_manche_moi = false;
 var passe = false;
-var nb_cartes_moi = 1;
-var nb_cartes_lui = 1;
+var nb_cartes_moi = 26;
+var nb_cartes_lui = 26;
 var nb_tour = 0;
 var score = 0;
 var tapis = new Array();
@@ -24,7 +24,6 @@ var mon_tour = "";
 var etat = "";
 
 function vide_variable(){
-	//variables pour le jeu
 	passe_manche_lui = false;
 	passe_manche_moi = false;
 	passe = false;
@@ -82,9 +81,6 @@ function ferme(){
 			data: {
 				"nb_tour": nb_tour, 
 				"id_partie": id_partie
-			},
-			error: function(jqXHR, textStatus, errorThrown){
-				alert("Chemin non accessible :" + errorThrown + " " + jqXHR.status);
 			}
 		});
 		
@@ -186,7 +182,7 @@ function commencer(){
 	
 	j = 0;
 	for(carte in cartes){
-		document.getElementById('cartesHoriJ1').innerHTML += "<span id='carte_"+j+"' onclick='javascript:jouer_carte("+j+")'>"+cartes[carte]+"</span> ";
+		document.getElementById('cartesHoriJ1').innerHTML += "<img src='./Cartes/"+cartes[carte]+".png' class='cartes_img' height='80px' width='50px' id='carte_"+j+"' onClick='javascript:jouer_carte("+j+")' alt='"+cartes[carte]+"'>";
 		j++;
 	}
 	
@@ -348,8 +344,7 @@ function jouer_carte(num_carte){
 			document.getElementById('joueur2').style.display = 'none';
 			document.getElementById('joueur1').style.display = 'none';
 			document.getElementById('plateau2').style.display = 'none';
-			document.getElementById('enregistrer_ligne').style.display = 'none';
-			document.getElementById('infos_tour').innerHTML = "<center><h3>Bravo "+moi+" ! Vous avez gagne ce tour.</h3><br/> <button onClick='javascript:new_tour();'>Nouveau tour</button><button id='retour' onClick='javascript:self.location.href(\"./CreationPartie.html\");'>Retour</button></center>";
+			document.getElementById('infos_tour').innerHTML = "<center><h3>Bravo "+moi+" ! Vous avez gagne ce tour.</h3><br/> <button id='retour' onClick='javascript:self.location.href(\"./CreationPartie.html\");'>Retour</button></center>";
 
 		}else{	
 			
@@ -390,9 +385,6 @@ function envoyer_infos(libel_carte){
 			"etat": etat //passe, va_passer, passe_manche, quitter, vider
 		},
 		success : function(data){
-		},
-		error: function(jqXHR, textStatus, errorThrown){
-			alert("Chemin non accessible :" + errorThrown);
 		}
 	});
 	etat = "";
@@ -444,7 +436,6 @@ function attendre_infos(){
 						document.getElementById('joueur2').style.display = 'none';
 						document.getElementById('joueur1').style.display = 'none';
 						document.getElementById('plateau2').style.display = 'none';
-						document.getElementById('enregistrer_ligne').style.display = 'none';
 						document.getElementById('infos_tour').innerHTML = "<center><h5>Vous avez gagne ! Le joueur "+joueur_trouve+" est parti.</h5><br/><button id='retour' onClick='javascript:location.href(\"./CreationPartie.html\");'>Retour</button></center>";
 					}
 					
@@ -457,8 +448,7 @@ function attendre_infos(){
 						document.getElementById('joueur2').style.display = 'none';
 						document.getElementById('joueur1').style.display = 'none';
 						document.getElementById('plateau2').style.display = 'none';
-						document.getElementById('enregistrer_ligne').style.display = 'none';
-						document.getElementById('infos_tour').innerHTML = "<center><h3>Dommage ... "+joueur_trouve+" a gagne ce tour.</h3><br/> <button onClick='javascript:new_tour();'>Nouveau tour</button><button id='retour' onClick='javascript:location.href(\"./CreationPartie.html\");'>Retour</button></center>";
+						document.getElementById('infos_tour').innerHTML = "<center><h3>Dommage ... "+joueur_trouve+" a gagne ce tour.</h3><br/><button id='retour' onClick='javascript:location.href(\"./CreationPartie.html\");'>Retour</button></center>";
 	
 					}else if(!passe_manche_moi){
 						mon_tour = 1;
@@ -494,11 +484,7 @@ function change_nb_cartes(id_div, nb){
 
 function carte_tapis(val_carte){
 	tapis[tapis.length] = val_carte;
-	document.getElementById('plateau2').innerHTML += " <span class='carte_tapis'>"+val_carte+"</span>";
-}
-
-function new_tour(){
-	//on boucle sur le serveur en attendant que l'autre joueur donne sa reponse
+	document.getElementById('plateau2').innerHTML += " <img src='./Cartes/"+val_carte+".png' class='cartes_img' height='80px' width='50px' alt='"+val_carte+"' />";
 }
 
 //a la fin de chaque tour, on enregistre les infos dans la bdd
@@ -512,22 +498,19 @@ function save_partie(){
 			"id1" : id_moi,
 			"id_partie": id_partie,
 			"score": score
-		},
-		error: function(jqXHR, textStatus, errorThrown){
-			alert("Chemin non accessible :" + errorThrown + " " + jqXHR.status);
 		}
 	});
 }
 	
 //selection partie
 	
-/*$('#showPartieEnPause').click(function(){
+$('#showPartieEnPause').click(function(){
 	var span = document.getElementById('showPartieEnPause');
 	var div = document.getElementById('PlayOnPause');
-	if( div.style.display == 'none'){
+	if(div.style.display == 'none'){
 		span.innerHTML = '-';
+		SearchTypePartie("pause", div);
 		div.style.display ='block';
-		SearchTypePartie("EnPause", div);
 	}
 	else{
 		div.style.display = 'none';
@@ -537,32 +520,48 @@ function save_partie(){
 	return false;
 });
 
-$('#showPartieEnAttente').click(function(){
-	var span = document.getElementById('showPartieEnAttente');
-	var div = document.getElementById('PlayOnWait');
-	if( div.style.display == 'none'){
-		span.innerHTML = '-';
-		div.style.display ='block';
-		SearchTypePartie("EnAttente", div);
-	}
-	else {
-		div.style.display = 'none';
-		span.innerHTML = '+';	
-		div.innerHTML ="";
-	}
-	return false;
-});
-
-function SearchTypePartie(etat, div){
+function reprendre_partie(id_part, log_adv){
+	moi = getCookie("CookieLogin");
 	
 	$.ajax({
 		type: 'GET',
-		url : rootURL + 'query?etat=' + etat,
+		url : rootURL + '/Partie/AttendreJoueur',
 		dataType : 'json',
+		data: {
+			"id_partie": id_part,
+			"login1": moi,
+			"login2": log_adv
+		},
 		success : function(data){
-			console.log(data);
-			console.log("parties d'etat " + etat);
-			renderList(data, div);
+			if(data.trouve == 0){
+				timer = setInterval(reprendre_partie(id_part, log_adv), 10000);
+			}else{
+				annuler_boucle();
+				
+				id_moi = data.id_J1;
+				id_joueur_trouve = data.id_J2;
+				id_partie = id_part;
+				joueur_trouve = log_adv;
+				nb_cartes_moi = data.cartes.length;
+				
+				if(data.debut == id_moi){
+					debut = true;
+				}else{
+					debut = false;
+				}
+				
+				i = 0;
+				
+				for(key1 in data.cartes){
+					cartes[i] = data.cartes[key1];
+					i++;
+				}
+				
+				for(key2 in data.tapis){
+					carte_tapis(data.tapis[key2]);
+				}
+				commencer();
+			}
 		},
 		error: function(jqXHR, textStatus, errorThrown){
 			alert("Mauvais etat :" + errorThrown);
@@ -570,48 +569,25 @@ function SearchTypePartie(etat, div){
 	});
 }
 
-function renderList(data, div){
-	if(data!=null){
-		div.innertHTML ='<ul>';
-		for(key in data){
-			var unePartie = data[key];
-			console.log(div);
-			div.innerHTML += '<li><a>'+unePartie.idPartie+' - '+ unePartie.NbJoueurs+'</a></li>';
-		}
-		div.innertHTML +='</ul>';
-	}
-}
+function SearchTypePartie(etat, div){
 
-function findAllParties() {
-	console.log('findAll');
+	moi = getCookie("CookieLogin");
+	
 	$.ajax({
 		type: 'GET',
-		url: rootURL,
-		dataType: "json", 
-	});
-}
-
-function CreerPartie(){
-	console.log('Creation partie :');
-	$.ajax({
-		type: 'PUT',
-		contentType : 'application/json',
-		url: rootURL + 'creerPartie/',
-		dataType: 'json',
-		data : PartieformToJSON(),
-		success : function(data, textStatus, jqXHR){
-			alert('Joueur inscrit');
+		url : rootURL + '/Partie/EnPause',
+		dataType : 'json',
+		data: {
+			"etat": etat,
+			"login": moi
 		},
-		error : function(jqHXR, testStatus, errorThrown){
-			alert('Probleme d\'inscription');
+		success : function(data){
+			for(key in data.parties){
+				div.innerHTML += "<li onClick='javascript:reprendre_partie("+data.parties[key]+", \""+data.logins[key]+"\")'>Continuer la partie avec "+data.logins[key]+"</li>";
+			}
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			alert("Mauvais etat :" + errorThrown);
 		}
 	});
 }
-
-function PartieformToJSON(){
-	var date = new Date(year, month, day);
-	return JSON.stringify({
-		"NbJoueurs": $('#nbJoueur').val(),
-		"dateDebut": date
-	});
-}*/

@@ -1,17 +1,18 @@
 package ressources;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.ws.rs.*;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import com.mysql.jdbc.Statement;
 
 @Path("Joueur")
 public class Population {
-	private static ArrayList<Joueur> joueurs;
+	private static ArrayList<Joueur> joueurs = new ArrayList<Joueur>();
 	//private static int countJoueur = 0;
 
 	public Population(){
@@ -66,16 +67,50 @@ public class Population {
 		return s;
 	}
 
-	/*@PUT
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("ajoutJoueur")
-	public void AddJoueur(Joueur j){
-		Joueur joueur = new Joueur(j.getNom(), j.getPrenom(), j.getLogin(), j.getMail(), j.getMdp());
-		joueurs.add(joueur);
-		for (Joueur jo : joueurs){
-			System.out.println(jo.getNom());
+	@Path("/ajoutJoueur")
+	public Response AddJoueur(Joueur j) throws SQLException, ClassNotFoundException{
+		// Vérification que le login n'est pas utilisé
+		BDD database = new BDD();
+		String select = "SELECT login FROM joueur WHERE login='"+j.getLogin()+"';";
+		ResultSet res = database.stmt.executeQuery(select);
+		res.last();
+		int nb_lignes = res.getRow();
+		String s = null;
+
+		System.out.println("ajoutjoueur : ");
+		
+		if(nb_lignes < 1){
+			// Ajout du joueur dans la base de données
+
+			String insert = "INSERT INTO  joueur "
+					+"(prenom, mail, login, mdp, score, nom) "
+					+"VALUES ('"+j.getPrenom()+"', '"+j.getMail()+"', '"+j.getLogin()+"', '"+j.getMdp()+"', '"+j.getScore()+"', '"+j.getNom()+"');";
+			int nb = database.stmt.executeUpdate(insert, Statement.RETURN_GENERATED_KEYS);
+			database.closeConnection();
+			System.out.println("nb : "+nb);
+			Joueur joueur = new Joueur(nb, j.getNom(), j.getPrenom(), j.getLogin(), j.getMail(), j.getMdp(), j.getScore());
+			System.out.println(joueur.getLogin());
+			joueurs.add(joueur);
+			for ( Joueur jo : joueurs){
+				System.out.println(jo.getNom());
+			}
+			s= "{" +
+			"id : "+ nb +
+			"nom :" + j.getNom() +
+			"prenom :" + j.getPrenom() +
+			"login :" + j.getLogin() +
+			"mail :" + j.getMail() +
+			"mdp :" + j.getMdp() + 
+			"score : " + j.getScore() +
+			"}";
+			return Construction_response.Construct(201, s);
 		}
-	}*/
+		else {
+			return Construction_response.Construct(405, s);
+		}
+	}
 
 	@DELETE
 	@Path("supprimeJoueur/{uniqueId}")

@@ -21,6 +21,7 @@ var passe = false;
 var passe_manche_J1 = false;
 var passe_manche_J2 = false;
 var perdant = "";
+var tour = "";
 
 function vide_variable(){
 	id_partie = 0;
@@ -38,6 +39,7 @@ function vide_variable(){
 	nb_tour = 0;
 	score_J1 = 0;
 	score_J2 =0;
+	tour = "";
 }
 
 $('#retour_co_locale').click(function(){
@@ -74,13 +76,34 @@ function deco_joueur2(){
 	self.location.href = "./ConnexionLocale.html";
 }
 
+function pause_partie(){
+	$.ajax({
+		type: 'POST',
+		url : rootURL + '/Jouer/PauseLocal',
+		dataType : 'json',
+		data: {
+			"nb_tour": nb_tour, 
+			"id_partie": id_partie,
+			"login1": joueur_1,
+			"login2": joueur_2,
+			"cartesJ1": cartes1.toString(),
+			"cartesJ2": cartes2.toString(),
+			"tapis": tapis.toString(),
+			"tour": tour
+		}
+	});
+	alert("Partie enregistree !");
+	
+	self.location.href = "./Client.html";
+}
+
 function afficher_noms(){
 	var span = document.getElementById('nom_joueur_2');
 	var joueur_co_2 = getCookie("CookieLogin2");
 	var joueur_co_1 = getCookie("CookieLogin");
 	
 	if(joueur_co_2){	
-		span.innerHTML = ' et '+joueur_co_2+" <button id='enregistrer'>Enregistrer la partie</button>";
+		span.innerHTML = ' et '+joueur_co_2+" <button id='enregistrer' onClick='javascript: pause_partie();'>Enregistrer la partie</button>";
 		span.style.display ='block';
 	}else{
 		joueur_co_2 = "Joueur 2";
@@ -90,6 +113,7 @@ function afficher_noms(){
 }
 
 function change_joueur(joueur){
+	tour = joueur;
 	if(joueur == "J1"){
 		//on cache les cartes de J2
 		document.getElementById('cartesHoriJ2').style.display = 'none';
@@ -227,12 +251,12 @@ function new_tour(){
 			
 			//les cartes de J1
 			for(carte in cartes1){
-				document.getElementById('cartesHoriJ1').innerHTML += "<span id='carte1_"+i+"' onclick='javascript:jouer_carte(\"J1\", "+i+")'>"+cartes1[carte]+"</span> ";
+				document.getElementById('cartesHoriJ1').innerHTML += "<img src='./Cartes/"+cartes1[carte]+".png' id='carte1_"+i+"' class='cartes_img' height='80px' width='50px' alt='"+cartes1[carte]+"' onclick='javascript:jouer_carte(\"J1\", "+i+")'/>";
 				i++;
 			}
 			//les cartes de J2
 			for(carte2 in cartes2){
-				document.getElementById('cartesHoriJ2').innerHTML += "<span id='carte2_"+j+"' onclick='javascript:jouer_carte(\"J2\", "+j+")'>"+cartes2[carte2]+"</span> ";
+				document.getElementById('cartesHoriJ2').innerHTML += "<img src='./Cartes/"+cartes2[carte2]+".png' id='carte2_"+j+"' class='cartes_img' height='80px' width='50px' alt='"+cartes2[carte2]+"' onclick='javascript:jouer_carte(\"J2\", "+j+")'/>";
 				j++;
 			}
 					
@@ -245,7 +269,7 @@ function new_tour(){
 
 function carte_tapis(val_carte){
 	tapis[tapis.length] = val_carte;
-	document.getElementById('plateau2').innerHTML += " <span class='carte_tapis'>"+val_carte+"</span>";
+	document.getElementById('plateau2').innerHTML += "<img src='./Cartes/"+val_carte+".png' height='80px' width='50px' class='cartes_img' alt='"+val_carte+"'/>";
 }
 
 function passer(j){
@@ -437,12 +461,12 @@ function demarrer_partie(){
 			
 			//les cartes de J1
 			for(carte in cartes1){
-				document.getElementById('cartesHoriJ1').innerHTML += "<span id='carte1_"+i+"' onclick='javascript:jouer_carte(\"J1\", "+i+")'>"+cartes1[carte]+"</span> ";
+				document.getElementById('cartesHoriJ1').innerHTML += "<img src='./Cartes/"+cartes1[carte]+".png' class='cartes_img' height='80px' width='50px' id='carte1_"+i+"' alt='"+cartes1[carte]+"' onclick='javascript:jouer_carte(\"J1\", "+i+")'/>";
 				i++;
 			}
 			//les cartes de J2
 			for(carte2 in cartes2){
-				document.getElementById('cartesHoriJ2').innerHTML += "<span id='carte2_"+j+"' onclick='javascript:jouer_carte(\"J2\", "+j+")'>"+cartes2[carte2]+"</span> ";
+				document.getElementById('cartesHoriJ2').innerHTML += "<img src='./Cartes/"+cartes2[carte2]+".png' class='cartes_img' height='80px' width='50px' id='carte2_"+j+"' alt='"+cartes2[carte2]+"' onclick='javascript:jouer_carte(\"J2\", "+j+")'/> ";
 				j++;
 			}				
 		},

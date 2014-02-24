@@ -167,12 +167,12 @@ public class Partie {
 			
 		String s = "{ \"id_partie\" : \""+nb+"\", \"debut\" : \""+id_debut+"\", ";
 		
-		String req = "INSERT INTO  jouer "
+		String req = "INSERT INTO jouer "
 				+"(id_partie, id_joueur, scorepartie) "
 				+"VALUES ('"+nb+"', '"+id1+"', '0');";
 		stmt.executeUpdate(req);
 
-		String req2 = "INSERT INTO  jouer "
+		String req2 = "INSERT INTO jouer "
 				+"(id_partie, id_joueur, scorepartie) "
 				+"VALUES ('"+nb+"', '"+id2+"', '0');";
 		stmt.executeUpdate(req2);
@@ -427,6 +427,174 @@ public class Partie {
 		
 		return Construction_response.Construct(201, "{}");
 	}
+	
+	@GET
+	@Path("EnPause")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response MontrerEnPause(@QueryParam("etat") String etat, @QueryParam("login") String login) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		
+		int id_partie;
+		int id_joueur = 0;
+		String log = "";
+		
+		String s = "{";
+		
+		String requete = "Select id FROM joueur WHERE login = '"+login+"';";
+		ResultSet rs = stmt.executeQuery(requete);
+
+		if(rs.next()){
+			id_joueur = rs.getInt("id");
+			
+			String logins = ", \"logins\" : [";
+			String partie = " \"parties\" : [";
+		
+			String req1 = "SELECT p.id FROM partie p INNER JOIN jouer j ON j.id_partie = p.id WHERE p.etat = 'pause' AND j.id_joueur = "+id_joueur;
+			
+			ResultSet resultat = stmt.executeQuery(req1);
+			
+			resultat.last();
+			
+			//on recupere le numero de la ligne
+			int nb_lignes = resultat.getRow();
+			
+			resultat.beforeFirst();
+			
+			int[] parts = new int[nb_lignes];
+			
+			int i =0;
+			while(resultat.next()){
+				
+				if(i > 0){
+					partie += ", ";
+				}
+				
+				id_partie = resultat.getInt("id");
+				
+				partie += "\""+id_partie+"\"";
+				
+				parts[i] = id_partie;
+						
+				i++;
+			}
+			
+			for(int j=0; j<parts.length;j++){
+				if(j>0)
+					logins += ", ";
+				
+				String req2 = "SELECT jo.login FROM joueur jo INNER JOIN jouer j ON j.id_joueur = jo.id WHERE j.id_partie = "+parts[j]+" AND j.id_joueur != "+id_joueur;
+				
+				ResultSet res = stmt.executeQuery(req2);
+				
+				if(res.next()){
+					log = res.getString("login");
+					logins += "\""+log+"\"";
+				}
+			}
+			partie += "]";
+			logins += "]";
+			
+			s += partie+logins;
+		}
+		
+		s += "}";
+		
+		return Construction_response.Construct(200, s);
+	}
+	
+	@GET
+	@Path("AttendreJoueur")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response ReprendrePartie(@QueryParam("id_partie") int id_partie, @QueryParam("login1") String login1, @QueryParam("login2") String login2) throws ClassNotFoundException, SQLException{
+		if(stmt == null){
+			new BDD();
+		}
+		
+		int id1 = 0;
+		int id2 = 0;
+		int trouve = 0;
+		int debut = 0;
+		String s = "{";
+		
+		
+		String requete = "Select id FROM joueur WHERE login = '"+login1+"';";
+		ResultSet rs = stmt.executeQuery(requete);
+		
+		if(rs.next()){
+			id1 = rs.getInt("id");
+		}
+		
+		String requet = "Select id FROM partie WHERE etat = 'pause' AND id = "+id_partie;
+		ResultSet rst = stmt.executeQuery(requet);
+		
+		if(rst.next()){
+			stmt.executeUpdate("UPDATE joueur SET en_attente_partie = 2 WHERE login = '"+login1+"'");
+		}
+		
+		ResultSet resultat = stmt.executeQuery("SELECT id FROM joueur WHERE login = '"+login2+"' AND en_attente_partie = 2");
+
+		//le joueur attend de jouer avec nous
+		if(resultat.next()){
+			id2 = resultat.getInt("id");
+			trouve = 1;
+			
+			stmt.executeUpdate("UPDATE joueur SET en_attente_partie = 0 WHERE login = '"+login2+"'");
+			stmt.executeUpdate("UPDATE partie SET etat = 'en cours' WHERE id = '"+id_partie+"'");
+			
+			String req2 = "Select doit_jouer FROM partie WHERE id = "+id_partie;
+			ResultSet result2 = stmt.executeQuery(req2);
+	
+			if(result2.next()){
+				debut = result2.getInt("doit_jouer");
+			}
+			s += "\"id_J1\" : \""+id1+"\", \"id_J2\" : \""+id2+"\", \"debut\" : \""+debut+"\", \"cartes\" : [";
+			
+			String req3 = "SELECT libelle_carte FROM sauvegarde WHERE id_partie = "+id_partie+" AND id_joueur = "+id1;
+			ResultSet result3 = stmt.executeQuery(req3);
+
+			int i =0;
+			
+			while(result3.next()){
+					if(i > 0){
+						s += ", ";
+					}
+					
+					s += "\""+result3.getString("libelle_carte")+"\"";
+							
+					i++;
+			}
+			
+			stmt.executeUpdate("DELETE FROM sauvegarde WHERE id_partie = "+id_partie+" AND id_joueur = "+id1);
+			
+			s += "], \"tapis\" : [";
+			
+			String req4 = "SELECT libelle_carte FROM sauvegarde WHERE id_partie = "+id_partie+" AND id_joueur = 0";
+			ResultSet result4 = stmt.executeQuery(req4);
+
+			int j =0;
+			
+			while(result4.next()){
+					if(j > 0){
+						s += ", ";
+					}
+					
+					s += "\""+result4.getString("libelle_carte")+"\"";
+							
+					j++;
+			}
+			
+			s += "], ";
+		}
+		
+		s += "\"trouve\": \""+trouve+"\"}";
+		
+		//System.out.println("s :"+s);
+		
+		return Construction_response.Construct(200, s);
+	}
+		
 	
 	
 	public int getIdPartie(){return this.idPartie;}

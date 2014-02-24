@@ -2,7 +2,7 @@ package ressources;
 
 //import java.awt.PageAttributes.*;
 
-//import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.sql.*;
 
 import static ressources.BDD.stmt;
@@ -11,9 +11,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-//@XmlRootElement
-
 @Path("Player")
+@XmlRootElement
 public class Joueur {
 	
 	private int idJoueur = 0;

@@ -107,7 +107,7 @@ function Inscription(){
 }
 
 function Menu(){
-	self.location.href = "./Menu.html";
+	self.location.href = "./CreationPartie.html";
 }
 
 function NewGame(){
